@@ -6,7 +6,7 @@
 /*   By: jvalle-d <jvalle-d@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 23:11:47 by jvalle-d          #+#    #+#             */
-/*   Updated: 2025/11/09 23:21:09 by jvalle-d         ###   ########.fr       */
+/*   Updated: 2025/11/11 19:50:44 by jvalle-d         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,12 @@ export const hashPassword = async (
 	if(!req.body.password){
 		return next();
 	}
+	//console.log(req.body.password);
 	const password = req.body.password;
 	const salt = await bcrypt.genSalt(10);
 	const hashedPassword = await bcrypt.hash(password, salt);
 	req.body.password = hashedPassword;
+	//console.log(req.body.password);
 	next();
 
   } catch (error) {
