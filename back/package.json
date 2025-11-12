@@ -1,23 +1,25 @@
 {
-  "name": "back",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "start": "ts-node server.ts"
-  },
-  "dependencies": {
+	"name": "back",
+	"private": true,
+	"version": "0.0.0",
+	"type": "module",
+	"scripts": {
+		"start": "ts-node server.ts",
+		"build": "tsc",
+		"serve": "node dist/server.js"
+	},
+	"dependencies": {
     "bcrypt": "^6.0.0",
     "dotenv": "^17.2.3",
-    "express": "^5.1.0",
+		"express": "^5.1.0",
     "jsonwebtoken": "^9.0.2"
-  },
-  "devDependencies": {
+	},
+	"devDependencies": {
     "@types/bcrypt": "^6.0.0",
-    "@types/express": "^5.0.5",
+		"@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.10.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
-  }
+		"@types/node": "^24.10.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.9.3"
+	}
 }

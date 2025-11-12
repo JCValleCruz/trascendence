@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-import express from 'express';
+import express from "express";
 import 'dotenv/config'; 							//Añadir soporte para la lectura de .env 
 
 import authRoutes from './routes/auth';  			//Rutas para auth
@@ -36,7 +36,7 @@ app.post('/testHash', hashPassword, (req, res) => {
 
 
 app.listen(PORT, () => {
-  console.log(`Backend running at http://localhost:${PORT}/`);
+	console.log(`Backend running at http://localhost:${PORT}/`);
 });
 
 export default app;		
