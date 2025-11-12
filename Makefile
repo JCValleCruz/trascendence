@@ -3,11 +3,11 @@ NAME = trascendence
 all:
 	@mkdir -p /home/${USER}/data
 	@printf "Building and setting configuration for ${NAME}...\n"
-	@docker-compose -f docker-compose.yml --env-file .env up -d --build
+	@docker compose -f docker-compose.yml up -d --build
 
 down:
 	@printf "Stopping ${NAME}\n"
-	@docker-compose -f docker-compose.yml down
+	@docker compose -f docker-compose.yml down
 
 clean: down
 	@printf "Stopping and cleaning up all docker configurations of ${NAME}."
