@@ -16,6 +16,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    volumes:
+      - ./back/data:/app/data
+      - ./back/src:/app/src
+    environment:
+      - NODE_ENV=development
     networks:
       - trascendence-network
 
