@@ -4,22 +4,26 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"start": "tsx server.ts",
+		"start": "tsx src/server.ts",
 		"build": "tsc",
-		"serve": "node dist/server.js"
+		"seed": "tsx db/seed.ts",
+		"serve": "node dist/server.js",
+		"test": "vitest noseque"
 	},
 	"dependencies": {
 		"bcrypt": "^6.0.0",
+		"better-sqlite3": "^12.4.1",
 		"dotenv": "^17.2.3",
 		"express": "^5.1.0",
-		"jsonwebtoken": "^9.0.2"
+		"jsonwebtoken": "^9.0.2",
+		"tsx": "^4.20.6"
 	},
 	"devDependencies": {
 		"@types/bcrypt": "^6.0.0",
+		"@types/better-sqlite3": "^7.6.13",
 		"@types/express": "^5.0.5",
 		"@types/jsonwebtoken": "^9.0.10",
 		"@types/node": "^24.10.0",
-		"tsx": "^4.20.6",
 		"typescript": "^5.9.3"
 	}
 }

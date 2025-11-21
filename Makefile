@@ -24,7 +24,12 @@ fclean:
 	@docker builder prune --all --force
 	@if [ -n "$$(docker volume ls -q)" ]; then docker volume rm $$(docker volume ls -q); fi
 	@if [ -d "/home/${USER}/data" ]; then rm -rf /home/${USER}/data; fi
+	@if [ -d "./back/data" ]; then rm -rf ./back/data/*; fi
 
 re:	clean all
+
+seed:
+	@printf "Seeding the database...\n"
+	@docker compose exec backend npm run seed
 
 .PHONY	: all build down re clean fclean

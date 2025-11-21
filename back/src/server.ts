@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   server.ts                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: jvalle-d <jvalle-d@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ppeckham <ppeckham@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/11/09 22:25:02 by jvalle-d          #+#    #+#             */
-/*   Updated: 2025/11/11 19:50:22 by jvalle-d         ###   ########.fr       */
+/*   Updated: 2025/11/13 19:58:18 by ppeckham         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@ import express from "express";
 import 'dotenv/config'; 							//Añadir soporte para la lectura de .env 
 
 import authRoutes from './routes/auth';  			//Rutas para auth
+import userRoutes from './routes/user';
 import { hashPassword } from './middlewares/hashPassword'; //Importar función desde ruta
 const app = express();
 const PORT = process.env.PORT || 3000;  //Modifico para que en primer lugar intente funcionar con el puerto establecido en el .env
@@ -32,6 +33,12 @@ app.post('/testHash', hashPassword, (req, res) => {
     message: 'Password hasheado correctamente',
     hashedPassword: req.body.password
   });
+});
+
+app.use('/users', userRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 
