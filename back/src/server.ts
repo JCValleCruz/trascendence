@@ -14,6 +14,7 @@ import express from "express";
 import 'dotenv/config'; 							//Añadir soporte para la lectura de .env 
 
 import authRoutes from './routes/auth';  			//Rutas para auth
+import userRoutes from './routes/user';
 import { hashPassword } from './middlewares/hashPassword'; //Importar función desde ruta
 const app = express();
 const PORT = process.env.PORT || 3000;  //Modifico para que en primer lugar intente funcionar con el puerto establecido en el .env
@@ -32,6 +33,12 @@ app.post('/testHash', hashPassword, (req, res) => {
     message: 'Password hasheado correctamente',
     hashedPassword: req.body.password
   });
+});
+
+app.use('/users', userRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
 
 
