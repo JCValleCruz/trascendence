@@ -1,0 +1,6 @@
+{
+    //Fixes syntax errors by treating CSS as PostCSS.
+    "files.associations": {
+        "**/front/style.css": "postcss"
+     },
+}
