@@ -4,7 +4,7 @@
 	"version": "0.0.0",
 	"type": "module",
 	"scripts": {
-		"start": "tsx src/server.ts",
+		"start": "tsx src/index.ts",
 		"build": "tsc",
 		"seed": "tsx db/seed.ts",
 		"serve": "node dist/server.js",

@@ -1,49 +1,13 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   server.ts                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: ppeckham <ppeckham@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/11/09 22:25:02 by jvalle-d          #+#    #+#             */
-/*   Updated: 2025/11/13 19:58:18 by ppeckham         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 import express from "express";
-import 'dotenv/config'; 							//Añadir soporte para la lectura de .env 
+import dotenv from 'dotenv';
 
-import authRoutes from './routes/auth';  			//Rutas para auth
-import userRoutes from './routes/user';
-import { hashPassword } from './middlewares/hashPassword'; //Importar función desde ruta
-const app = express();
-const PORT = process.env.PORT || 3000;  //Modifico para que en primer lugar intente funcionar con el puerto establecido en el .env
+// Aquí solo creamos el servidor, luego le añadiremos cookie parser y el cors y le damos las variables de entorno
+dotenv.config();
 
-app.use(express.json());							  //permite recibir JSON en peticiones POST 
+export const createAPIServer = () => {
+	const app = express();
+	app.use(express.json());
+	// aquí habria que hacer app.use del cookieParse() y app.use de cors({...})
 
-app.use('/auth', authRoutes);       
-
-app.get('/', (req, res) => {
-  res.send('Backend is running!');
-});
-
-app.post('/testHash', hashPassword, (req, res) => {
-  console.log('Password hasheado:', req.body.password);
-  res.json({
-    message: 'Password hasheado correctamente',
-    hashedPassword: req.body.password
-  });
-});
-
-app.use('/users', userRoutes);
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
-
-app.listen(PORT, () => {
-	console.log(`Backend running at http://localhost:${PORT}/`);
-});
-
-export default app;		
+	return app;
+}
