@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { db } from '../../db/database.js';
 
-const userRouter = Router();
+// Nuestra api de todo lo relacionado con el usuario
+// con todos sus endpoints (y sus urls)
+const userApi = Router();
 
-userRouter.get('/', (req, res) => {
+userApi.get('/', (req, res) => {
   try {
     const users = db.prepare('SELECT id, username, email, created_at FROM users').all();
     res.json(users);
@@ -13,7 +15,7 @@ userRouter.get('/', (req, res) => {
   }
 });
 
-userRouter.get('/:id', (req, res) => {
+userApi.get('/:id', (req, res) => {
   try {
     const user = db.prepare('SELECT id, username, email, created_at FROM users WHERE id = ?').get(req.params.id);
     
@@ -28,4 +30,4 @@ userRouter.get('/:id', (req, res) => {
   }
 });
 
-export default userRouter;
+export default userApi;
