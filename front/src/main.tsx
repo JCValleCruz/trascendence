@@ -3,7 +3,7 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import { muiTheme } from "../theme";
+import { muiTheme } from "./style/theme";
 import Frontend from "./Frontend";
 import MainPage from "./pages/MainPage";
 // import ProfilePage from "./pages/ProfilePage";

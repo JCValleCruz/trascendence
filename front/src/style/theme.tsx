@@ -4,6 +4,38 @@ import "@fontsource/montserrat/400.css";
 import "@fontsource/montserrat/500.css";
 import "@fontsource/montserrat/700.css";
 
+declare module '@mui/material/styles' {
+    interface Palette {
+        accent: {
+            yellow: string;
+            yellowHover: string;
+            yellowDark: string;
+        };
+    }
+    interface PaletteOptions {
+        accent?: {
+            yellow?: string;
+            yellowHover?: string;
+            yellowDark?: string;
+        };
+    }
+    interface TypographyVariants {
+        displayTitle: React.CSSProperties;
+        authSubtitle: React.CSSProperties;
+    }
+    interface TypographyVariantsOptions {
+        displayTitle?: React.CSSProperties;
+        authSubtitle?: React.CSSProperties;
+    }
+}
+
+declare module '@mui/material/Typography' {
+    interface TypographyPropsVariantOverrides {
+        displayTitle: true;
+        authSubtitle: true;
+    }
+}
+
 const sharedTypography = {
 	fontFamily: "Montserrat, sans-serif",
 	h6: { // Toolbar
@@ -30,6 +62,21 @@ const sharedTypography = {
 		letterSpacing: "0%",
 		textTransform: "none" as const,
 	},
+    displayTitle: {
+        fontFamily: "'Archivo Black', sans-serif",
+        fontWeight: 900,
+        fontSize: "2.25rem",
+        textTransform: "uppercase" as const,
+        lineHeight: 0.85,
+        letterSpacing: "-0.05em",
+    },
+    authSubtitle: {
+        fontFamily: "Montserrat, sans-serif",
+        fontWeight: 700,
+        fontSize: "0.875rem",
+        textTransform: "uppercase" as const,
+        letterSpacing: "0.3em",
+    },
 };
 
 // Shared palette colors
@@ -70,6 +117,11 @@ const sharedPaletteColors = {
 		dark: "#911C33",
 		contrastText: "#FFFFFF",
 	},
+    accent: {
+        yellow: "#FACC15",
+        yellowHover: "#fde047",
+        yellowDark: "#ca8a04",
+    },
 };
 
 const theme: ThemeOptions = {
@@ -98,6 +150,30 @@ const theme: ThemeOptions = {
 		},
 	},
 	typography: sharedTypography,
+    components: {
+        MuiButton: {
+            styleOverrides: {
+                root: {
+                    borderRadius: 0,
+                    textTransform: 'none',
+                },
+            },
+        },
+        MuiDialog: {
+            styleOverrides: {
+                paper: {
+                    borderRadius: 0,
+                },
+            },
+        },
+        MuiAlert: {
+            styleOverrides: {
+                root: {
+                    borderRadius: 0,
+                },
+            },
+        },
+    },
 };
 
 export const muiTheme = createTheme(theme);

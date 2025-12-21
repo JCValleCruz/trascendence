@@ -1,123 +1,184 @@
-import { useState, type FC, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import {
     Box,
-    Dialog,
-    DialogContent,
-    DialogActions,
-    TextField,
-    Button,
     Stack,
     Typography,
     CircularProgress,
     Alert,
+    Link,
 } from "@mui/material";
+import {
+    StyledDialog,
+    StyledTextField,
+    PrimaryAuthButton,
+    OAuthButton,
+} from "../style/AuthModalStyle";
 
-interface LoginModalProps {
+interface Props {
     open: boolean;
     onClose: () => void;
     onLogin: (username: string, password: string) => Promise<void>;
+    onSwitchToRegister: () => void;
     isLoading?: boolean;
     error?: string;
 }
 
-const LoginModal: FC<LoginModalProps> = ({
+const LoginModal = ({
     open,
     onClose,
     onLogin,
+    onSwitchToRegister,
     isLoading = false,
     error,
-}) => {
-    const [username, setUsername] = useState("");
+}: Props) => {
+    const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!username || !password) return;
-
-        await onLogin(username, password);
+        if (!email || !password) return;
+        await onLogin(email, password);
     };
 
     const handleClose = () => {
         if (!isLoading) {
-            setUsername("");
+            setEmail("");
             setPassword("");
             onClose();
         }
     };
 
+    const handleSwitchToRegister = () => {
+        setEmail("");
+        setPassword("");
+        onSwitchToRegister();
+    };
+
     return (
-        <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-            <form onSubmit={handleSubmit}>
-                <DialogContent>
-                    <Stack spacing={3}>
-                        <Box sx={{ display: "flex", justifyContent: "center" }}>
-                            <img
-                                src="../../public/backgrounds/logo-inicio-sesion.png"
-                                alt="eysa-logo"
-                                style={{ height: "92px", width: "92px" }}
-                            />
-                        </Box>
-                        <Typography
-                            variant="subtitle1"
-                            align="center"
-                            color="primary.main"
-                            fontSize="32px"
-                        >
-                            Iniciar Sesión
+        <StyledDialog open={open} onClose={handleClose}>
+            <Box sx={{ p: 4 }}>
+                {/* Title */}
+                <Box sx={{ textAlign: "center", mb: 4 }}>
+                    <Typography
+                        variant="authSubtitle"
+                        sx={{
+                            borderBottom: "2px solid",
+                            borderColor: "secondary.main",
+                            display: "inline-block",
+                            pb: 0.5,
+                            mb: 1,
+                        }}
+                    >
+                        Sign in to
+                    </Typography>
+                    <Typography variant="displayTitle">
+                        Transcendence
+                    </Typography>
+                </Box>
+
+                {/* OAuth Buttons */}
+                <Stack spacing={2} sx={{ mb: 3 }}>
+                    <OAuthButton startIcon={<span>G</span>}>
+                        <Typography variant="subtitle1">
+                            Continue with Google
                         </Typography>
-                        {error && <Alert severity="error">{error}</Alert>}
-                        <Stack spacing={2.5}>
-                            <TextField
-                                fullWidth
-                                label="Usuario"
-                                name="username"
-                                autoComplete="username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
-                                disabled={isLoading}
-                                required
-                            />
-                            <TextField
-                                fullWidth
-                                type="password"
-                                label="Contraseña"
-                                name="password"
-                                autoComplete="current-password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                disabled={isLoading}
-                                required
-                            />
-                        </Stack>
-                    </Stack>
-                </DialogContent>
-                <DialogActions sx={{ flexDirection: "column", gap: 1, pb: 4 }}>
+                    </OAuthButton>
+                    <OAuthButton startIcon={<span>🐙</span>}>
+                        <Typography variant="subtitle1">
+                            Continue with Github
+                        </Typography>
+                    </OAuthButton>
+                </Stack>
+
+                {/* Error Alert */}
+                {error && (
+                    <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>
+                        {error}
+                    </Alert>
+                )}
+
+                {/* Form */}
+                <form onSubmit={handleSubmit}>
                     <Stack spacing={2}>
-                        <Button
+                        <StyledTextField
+                            fullWidth
+                            type="email"
+                            label="EMAIL"
+                            name="email"
+                            autoComplete="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={isLoading}
+                            required
+                        />
+                        <StyledTextField
+                            fullWidth
+                            type="password"
+                            label="PASSWORD"
+                            name="password"
+                            autoComplete="current-password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            disabled={isLoading}
+                            required
+                        />
+
+                        <PrimaryAuthButton
                             type="submit"
-                            sx={{ height: 48, minWidth: 395 }}
-                            variant="contained"
-                            disabled={isLoading || !username || !password}
+                            disabled={isLoading || !email || !password}
+                            sx={{ mt: 3 }}
                         >
                             {isLoading ? (
-                                <CircularProgress size={24} color="inherit" />
+                                <CircularProgress size={24} sx={{ color: "secondary.main" }} />
                             ) : (
-                                "Iniciar Sesión"
+                                "Log in"
                             )}
-                        </Button>
-                        <Button
-                            type="button"
-                            sx={{ height: 48, minWidth: 395 }}
-                            variant="outlined"
-                            disabled={isLoading}
-                            onClick={handleClose}
-                        >
-                            Volver
-                        </Button>
+                        </PrimaryAuthButton>
                     </Stack>
-                </DialogActions>
-            </form>
-        </Dialog>
+                </form>
+
+                {/* Reset Password Link */}
+                <Link
+                    href="#"
+                    sx={{
+                        display: "block",
+                        textAlign: "center",
+                        mt: 2,
+                        textDecoration: "underline",
+                        textDecorationThickness: "2px",
+                        textUnderlineOffset: "4px",
+                        color: "text.secondary",
+                        "&:hover": {
+                            color: "text.primary",
+                        },
+                    }}
+                >
+                    <Typography variant="subtitle1">Reset password</Typography>
+                </Link>
+
+                {/* Switch to Register */}
+                <Typography variant="body1" sx={{ textAlign: "center", mt: 3 }}>
+                    No account?{" "}
+                    <Link
+                        component="button"
+                        type="button"
+                        onClick={handleSwitchToRegister}
+                        sx={{
+                            fontWeight: 900,
+                            fontFamily: "'Archivo Black', sans-serif",
+                            textDecoration: "underline",
+                            textDecorationColor: "accent.yellow",
+                            textDecorationThickness: "4px",
+                            textUnderlineOffset: "2px",
+                            color: "text.primary",
+                            "&:hover": { color: "accent.yellowDark" },
+                        }}
+                    >
+                        Create one
+                    </Link>
+                </Typography>
+            </Box>
+        </StyledDialog>
     );
 };
 

@@ -12,6 +12,8 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { styled, keyframes } from "@mui/material/styles";
+import LoginModal from "./LoginModal";
+import RegisterModal from "./RegisterModal";
 
 // Styled Components
 const marquee = keyframes`
@@ -50,6 +52,8 @@ const Header = () => {
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const menuOpen = Boolean(anchorEl);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [loginModalOpen, setLoginModalOpen] = useState(false);
+    const [registerModalOpen, setRegisterModalOpen] = useState(false);
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -59,13 +63,62 @@ const Header = () => {
         setAnchorEl(null);
     };
 
-    const handleMenuItemClick = (path: string) => {
+    const handleNavigate = (path: string) => {
         handleMenuClose();
-        // navigate(path);
+        navigate(path); // Uncomment when ready
+    };
+
+    // Auth handlers
+    const handleOpenLoginModal = () => {
+        handleMenuClose();
+        setLoginModalOpen(true);
+    };
+
+    const handleLogin = async (email: string, password: string) => {
+        // TODO: Replace with actual API call
+        console.log("Login attempt:", email, password);
+
+        // Simulate API call
+        // const response = await fetch('/api/auth/login', { ... });
+        // if (response.ok) {
+        //     const data = await response.json();
+        //     // Store token, user data, etc.
+        // }
+
+        // On success:
+        setIsLoggedIn(true);
+        setLoginModalOpen(false);
+    };
+
+    const handleRegister = async (
+        username: string,
+        email: string,
+        password: string
+    ) => {
+        try {
+            console.log("Register attempt:", username, email, password);
+            // TODO: Add your actual register API call here
+
+            setIsLoggedIn(true);
+            setRegisterModalOpen(false);
+        } catch (error) {
+            console.error("Registration failed:", error);
+            throw error;
+        }
+    };
+
+    const handleSwitchToRegister = () => {
+        setLoginModalOpen(false);
+        setRegisterModalOpen(true);
+    };
+
+    const handleSwitchToLogin = () => {
+        setRegisterModalOpen(false);
+        setLoginModalOpen(true);
     };
 
     const handleLogout = () => {
-        // CleanSession(userId) or similar // TODO: implement userSession clearing (token...)
+        // TODO: Clear session, tokens, etc.
         setIsLoggedIn(false);
         handleMenuClose();
         navigate("/");
@@ -178,12 +231,20 @@ const Header = () => {
                 {/* Conditional rendering based on login status */}
                 {!isLoggedIn ? (
                     <>
-                        <MenuItem onClick={() => handleMenuItemClick("/login")}>
+                        <MenuItem onClick={handleOpenLoginModal}>
                             Login
                         </MenuItem>
-                        <Divider sx={{ borderColor: "primary.light", borderBottomWidth: 5 }} />
+                        <Divider
+                            sx={{
+                                borderColor: "primary.light",
+                                borderBottomWidth: 5,
+                            }}
+                        />
                         <MenuItem
-                            onClick={() => handleMenuItemClick("/register")}
+                            onClick={() => {
+                                handleMenuClose();
+                                setRegisterModalOpen(true);
+                            }}
                         >
                             Register
                         </MenuItem>
@@ -192,28 +253,54 @@ const Header = () => {
                     <MenuItem onClick={handleLogout}>Logout</MenuItem>
                 )}
 
-                <Divider sx={{ borderColor: "primary.main", borderBottomWidth: 3 }} />
-                <MenuItem onClick={() => handleMenuItemClick("/profile")}>
+                <Divider
+                    sx={{ borderColor: "primary.main", borderBottomWidth: 3 }}
+                />
+                <MenuItem onClick={() => handleNavigate("/profile")}>
                     My Profile
                 </MenuItem>
-                <Divider sx={{ borderColor: "primary.dark", borderBottomWidth: 3 }} />
-                <MenuItem onClick={() => handleMenuItemClick("/stats")}>
+                <Divider
+                    sx={{ borderColor: "primary.dark", borderBottomWidth: 3 }}
+                />
+                <MenuItem onClick={() => handleNavigate("/stats")}>
                     Stats
                 </MenuItem>
-                <Divider sx={{ borderColor: "primary.light", borderBottomWidth: 5 }} />
-                <MenuItem onClick={() => handleMenuItemClick("/pong")}>
+                <Divider
+                    sx={{ borderColor: "primary.light", borderBottomWidth: 5 }}
+                />
+                <MenuItem onClick={() => handleNavigate("/pong")}>
                     Pong
                 </MenuItem>
-                <Divider sx={{ borderColor: "primary.main", borderBottomWidth: 3 }} />
-                <MenuItem onClick={() => handleMenuItemClick("/other-game")}>
+                <Divider
+                    sx={{ borderColor: "primary.main", borderBottomWidth: 3 }}
+                />
+                <MenuItem onClick={() => handleNavigate("/other-game")}>
                     Other Game
                 </MenuItem>
-                <Divider sx={{ borderColor: "primary.dark", borderBottomWidth: 3 }} />
+                <Divider
+                    sx={{ borderColor: "primary.dark", borderBottomWidth: 3 }}
+                />
 
-                <MenuItem onClick={() => handleMenuItemClick("/social")}>
+                <MenuItem onClick={() => handleNavigate("/social")}>
                     Social
                 </MenuItem>
             </Menu>
+
+            {/* Login Modal */}
+            <LoginModal
+                open={loginModalOpen}
+                onClose={() => setLoginModalOpen(false)}
+                onLogin={handleLogin}
+                onSwitchToRegister={handleSwitchToRegister}
+            />
+
+            {/* Register Modal */}
+            <RegisterModal
+                open={registerModalOpen}
+                onClose={() => setRegisterModalOpen(false)}
+                onRegister={handleRegister}
+                onSwitchToLogin={handleSwitchToLogin}
+            />
         </>
     );
 };
