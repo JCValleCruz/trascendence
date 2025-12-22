@@ -1,52 +1,166 @@
-import Database from "better-sqlite3";
-import path from "path";
-import { fileURLToPath } from "url";
+/**
+ * database.ts - Configuración y conexión a MariaDB
+ * 
+ * Este módulo gestiona la conexión a la base de datos MariaDB usando mysql2.
+ * Exporta funciones para conectar, desconectar y obtener el pool de conexiones.
+ * Al conectar, crea automáticamente las tablas necesarias si no existen.
+ */
 
+import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Funciones para conectar y desconectar de la base de datos.
-// El objeto db es lo que usaremos en nuestro código.
+// Configurar dotenv para buscar en back/src/.env si no estamos en Docker
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../src/.env') });
 
-export let db: Database.Database;
+// ============================================================================
+// CONFIGURACIÓN
+// ============================================================================
 
-export const connect = async (dbPath: string) => {
-    const resolvedPath = path.resolve(__dirname, dbPath);
-    
-    db = new Database(resolvedPath, { verbose: console.log });
-    db.pragma('foreign_keys = ON');
-    db.pragma('journal_mode = WAL');
-
-    // Initialize tables
-    db.exec(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT UNIQUE NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-    `);
-
-    console.log('✓ Database connected and initialized');
+/**
+ * Configuración de la base de datos obtenida de las variables de entorno.
+ * Estos valores deben estar definidos en el archivo .env
+ */
+const dbConfig = {
+	host: process.env.DB_HOST || 'localhost',
+	port: Number(process.env.DB_PORT) || 3306,
+	user: process.env.DB_USER || 'root',
+	password: process.env.DB_PASSWORD || 'toor',
+	database: process.env.DB_NAME || 'db_name',
+	waitForConnections: true,       // Espera si no hay conexiones disponibles
+	connectionLimit: 10,            // Máximo de conexiones simultáneas
+	queueLimit: 0                   // Sin límite en la cola de espera
 };
 
-export const disconnect = async () => {
-    if (db) {
-        db.close();
-        console.log('✓ Database disconnected');
-    }
+// ============================================================================
+// POOL DE CONEXIONES
+// ============================================================================
+
+/**
+ * Pool de conexiones a MariaDB.
+ * Usamos un pool porque es más eficiente que crear/cerrar conexiones individuales.
+ * El pool se inicializa en la función connect() y se cierra en disconnect().
+ */
+export let pool: mysql.Pool;
+
+// ============================================================================
+// FUNCIONES PRINCIPALES
+// ============================================================================
+
+/**
+ * Conecta a la base de datos MariaDB y crea las tablas si no existen.
+ * Esta función debe llamarse al iniciar la aplicación.
+ * 
+ * @throws Error si no puede conectar a la base de datos
+ */
+export const connect = async (): Promise<void> => {
+	try {
+		// Crear el pool de conexiones
+		pool = mysql.createPool(dbConfig);
+
+		// Obtener una conexión para verificar que funciona
+		const connection = await pool.getConnection();
+		console.log(`✓ Conectado a MariaDB en ${dbConfig.host}:${dbConfig.port}`);
+
+		// Liberar la conexión de prueba
+		connection.release();
+
+		// Crear las tablas necesarias si no existen
+		await initializeTables();
+
+		console.log('✓ Base de datos conectada e inicializada');
+	} catch (error) {
+		console.error('✗ Error al conectar con MariaDB:', error);
+		throw error;
+	}
 };
 
-// Graceful shutdown handlers
+/**
+ * Cierra el pool de conexiones a la base de datos.
+ * Debe llamarse al cerrar la aplicación para liberar recursos.
+ */
+export const disconnect = async (): Promise<void> => {
+	if (pool) {
+		await pool.end();
+		console.log('✓ Conexión a MariaDB cerrada');
+	}
+};
+
+/**
+ * Obtiene una conexión del pool para realizar operaciones.
+ * Recuerda liberar la conexión con connection.release() después de usarla.
+ * 
+ * @returns Una conexión del pool
+ */
+export const getConnection = async (): Promise<mysql.PoolConnection> => {
+	return await pool.getConnection();
+};
+
+// ============================================================================
+// INICIALIZACIÓN DE TABLAS
+// ============================================================================
+
+/**
+ * Crea las tablas necesarias si no existen.
+ * Se ejecuta automáticamente al conectar.
+ * Si la tabla ya existe, no hace nada (gracias a IF NOT EXISTS).
+ */
+const initializeTables = async (): Promise<void> => {
+	const connection = await pool.getConnection();
+
+	try {
+		// ----------------------------------------------------------------
+		// TABLA: users
+		// Almacena la información básica de los usuarios
+		// ----------------------------------------------------------------
+		await connection.execute(`
+            CREATE TABLE IF NOT EXISTS users (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                username VARCHAR(50) UNIQUE NOT NULL COMMENT 'Nombre de usuario único',
+                email VARCHAR(255) UNIQUE NOT NULL COMMENT 'Email único para login',
+                password VARCHAR(255) NULL COMMENT 'Contraseña hasheada (NULL si usa OAuth)',
+                avatar_url VARCHAR(500) NULL COMMENT 'URL de la foto de perfil',
+                is_online BOOLEAN DEFAULT FALSE COMMENT 'Estado actual del usuario',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de registro',
+                last_login TIMESTAMP NULL COMMENT 'Última vez que inició sesión'
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        `);
+
+		console.log('✓ Tabla "users" verificada/creada');
+
+	} finally {
+		// Siempre liberamos la conexión, incluso si hay error
+		connection.release();
+	}
+};
+
+// ============================================================================
+// MANEJO DE CIERRE GRACEFUL
+// ============================================================================
+
+/**
+ * Handlers para cerrar la conexión correctamente cuando la app se detiene.
+ * Esto previene conexiones huérfanas en la base de datos.
+ */
+
+// Cuando el proceso de Node termina normalmente
 process.on('exit', () => {
-    if (db) db.close();
+	if (pool) {
+		pool.end();
+	}
 });
 
-process.on('SIGINT', () => {
-    disconnect().then(() => process.exit(128 + 2));
+// Cuando se presiona Ctrl+C en la terminal
+process.on('SIGINT', async () => {
+	await disconnect();
+	process.exit(128 + 2);
 });
 
-process.on('SIGTERM', () => {
-    disconnect().then(() => process.exit(128 + 15));
+// Cuando el proceso recibe señal de terminación (ej: Docker stop)
+process.on('SIGTERM', async () => {
+	await disconnect();
+	process.exit(128 + 15);
 });

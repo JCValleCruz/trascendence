@@ -20,6 +20,8 @@ services:
       - ./back/data:/app/data
       - ./back/src:/app/src
       - /app/node_modules
+    env_file:
+      - ./back/src/.env # Carga las variables desde back/src/.env
     environment:
       - NODE_ENV=development
     networks:

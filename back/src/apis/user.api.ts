@@ -1,38 +1,81 @@
-import { FastifyPluginAsync } from 'fastify';
-import { db } from '../../db/database.js';
+/**
+ * user.api.ts - API de usuarios
+ * 
+ * Endpoints para gestionar usuarios (listar, obtener por ID, etc.)
+ * Usa MariaDB para las consultas.
+ */
 
-// Definimos la "forma" que tendrán los parámetros de la URL
+import { FastifyPluginAsync } from 'fastify';
+import { pool } from '../../db/database.js';
+
+// ============================================================================
+// INTERFACES
+// ============================================================================
+
+/**
+ * Parámetros de URL para endpoints que reciben un ID
+ */
 interface UserParams {
 	id: string;
 }
 
+// ============================================================================
+// RUTAS DE USUARIOS
+// ============================================================================
+
 const userRoutes: FastifyPluginAsync = async (fastify, opts) => {
 
-	// GET / (Listar todos)
+	// ========================================================================
+	// GET / - Listar todos los usuarios
+	// ========================================================================
 	fastify.get('/', async (request, reply) => {
 		try {
-			const users = db.prepare('SELECT id, username, email, created_at FROM users').all();
-			// EN FASTIFY: No usas res.json(users). Simplemente retornas el objeto.
-			return users;
-		} catch (error) {
-			request.log.error(error); // Usamos el logger de Fastify
-			return reply.code(500).send({ error: 'Failed to fetch users' });
+			// Obtenemos todos los usuarios (sin el password por seguridad)
+			const [rows] = await pool.execute(
+				'SELECT id, username, email, avatar_url, is_online, created_at, last_login FROM users'
+			);
+
+			return rows;
+
+		} catch (error: any) {
+			request.log.error(error);
+			return reply.code(500).send({
+				error: 'Error al obtener usuarios',
+				details: error.message
+			});
 		}
 	});
 
+	// ========================================================================
+	// GET /:id - Obtener un usuario por su ID
+	// ========================================================================
 	fastify.get<{ Params: UserParams }>('/:id', async (request, reply) => {
 		try {
-			const { id } = request.params; // Ahora TS sabe que 'id' es un string
+			const { id } = request.params;
 
-			const user = db.prepare('SELECT id, username, email, created_at FROM users WHERE id = ?').get(id);
+			// Buscar usuario por ID (sin el password)
+			const [rows] = await pool.execute(
+				'SELECT id, username, email, avatar_url, is_online, created_at, last_login FROM users WHERE id = ?',
+				[id]
+			);
 
-			if (!user) {
-				return reply.code(404).send({ error: 'User not found' });
+			const users = rows as any[];
+
+			// Verificar si el usuario existe
+			if (users.length === 0) {
+				return reply.code(404).send({
+					error: 'Usuario no encontrado'
+				});
 			}
-			return user;
-		} catch (error) {
+
+			return users[0];
+
+		} catch (error: any) {
 			request.log.error(error);
-			return reply.code(500).send({ error: 'Failed to fetch user' });
+			return reply.code(500).send({
+				error: 'Error al obtener usuario',
+				details: error.message
+			});
 		}
 	});
 };
