@@ -11,53 +11,50 @@ import {
     StyledDialog,
     StyledTextField,
     PrimaryAuthButton,
-    OAuthButton,
 } from "../style/AuthModalStyle";
-import { validateEmail } from "../utils/validation";
 
 interface Props {
     open: boolean;
     onClose: () => void;
-    onLogin: (username: string, password: string) => Promise<void>;
-    onSwitchToRegister: () => void;
-    onSwitchToResetPassword: () => void;
+    onResetPassword: (email: string) => Promise<void>;
+    onSwitchToLogin: () => void;
     isLoading?: boolean;
     error?: string;
+    success?: boolean;
 }
 
-const LoginModal = ({
+const ResetPasswordModal = ({
     open,
     onClose,
-    onLogin,
-    onSwitchToRegister,
-    onSwitchToResetPassword,
+    onResetPassword,
+    onSwitchToLogin,
     isLoading = false,
     error,
+    success = false,
 }: Props) => {
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [emailError, setEmailError] = useState("");
+    const [isSuccess, setIsSuccess] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!email || !password) return;
-        await onLogin(email, password);
+        if (!email) return;
+        await onResetPassword(email);
+        setIsSuccess(true);
+        setEmail("");
     };
 
     const handleClose = () => {
         if (!isLoading) {
             setEmail("");
-            setPassword("");
-            setEmailError("");
+            setIsSuccess(false);
             onClose();
         }
     };
 
-    const handleSwitchToRegister = () => {
+    const handleSwitchToLogin = () => {
         setEmail("");
-        setPassword("");
-        setEmailError("");
-        onSwitchToRegister();
+        setIsSuccess(false);
+        onSwitchToLogin();
     };
 
     return (
@@ -75,31 +72,37 @@ const LoginModal = ({
                             mb: 1,
                         }}
                     >
-                        Sign in to
+                        Reset your password
                     </Typography>
                     <Typography variant="displayTitle">
                         Transcendence
                     </Typography>
                 </Box>
 
-                {/* OAuth Buttons */}
-                <Stack spacing={2} sx={{ mb: 3 }}>
-                    <OAuthButton startIcon={<span>G</span>}>
-                        <Typography variant="subtitle1">
-                            Continue with Google
-                        </Typography>
-                    </OAuthButton>
-                    <OAuthButton startIcon={<span>🐙</span>}>
-                        <Typography variant="subtitle1">
-                            Continue with Github
-                        </Typography>
-                    </OAuthButton>
-                </Stack>
+                {/* Instructions */}
+                <Typography
+                    variant="body1"
+                    sx={{
+                        textAlign: "center",
+                        mb: 3,
+                        color: "text.secondary",
+                    }}
+                >
+                    Enter your email address and we'll send you a link to reset
+                    your password.
+                </Typography>
 
                 {/* Error Alert */}
                 {error && (
-                    <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>
+                    <Alert severity="error" sx={{ mb: 2 }}>
                         {error}
+                    </Alert>
+                )}
+
+                {/* Success Alert */}
+                {isSuccess && ( // Change from `success` to `isSuccess`
+                    <Alert severity="success" sx={{ mb: 2 }}>
+                        Check your email for the reset link!
                     </Alert>
                 )}
 
@@ -113,30 +116,14 @@ const LoginModal = ({
                             name="email"
                             autoComplete="email"
                             value={email}
-                            onChange={(e) => {
-                                setEmail(e.target.value);
-                                setEmailError(validateEmail(e.target.value));
-                            }}
-                            disabled={isLoading}
-                            required
-                            error={!!emailError}
-                            helperText={emailError}
-                        />
-                        <StyledTextField
-                            fullWidth
-                            type="password"
-                            label="PASSWORD"
-                            name="password"
-                            autoComplete="current-password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            disabled={isLoading}
+                            onChange={(e) => setEmail(e.target.value)}
+                            disabled={isLoading || isSuccess}
                             required
                         />
 
                         <PrimaryAuthButton
                             type="submit"
-                            disabled={isLoading || !email || !password}
+                            disabled={isLoading || !email || isSuccess}
                             sx={{ mt: 3 }}
                         >
                             {isLoading ? (
@@ -144,41 +131,18 @@ const LoginModal = ({
                                     size={24}
                                     sx={{ color: "secondary.main" }}
                                 />
-                            ) : (
-                                "Log in"
-                            )}
+                            ) : isSuccess ? "Email Sent!" : "Send Reset Link"}
                         </PrimaryAuthButton>
                     </Stack>
                 </form>
 
-                {/* Reset Password Link */}
-                <Link
-                    component="button"
-                    type="button"
-                    onClick={onSwitchToResetPassword}
-                    sx={{
-                        display: "block",
-                        textAlign: "center",
-                        mt: 2,
-                        textDecoration: "underline",
-                        textDecorationThickness: "2px",
-                        textUnderlineOffset: "4px",
-                        color: "text.secondary",
-                        "&:hover": {
-                            color: "text.primary",
-                        },
-                    }}
-                >
-                    <Typography variant="subtitle1">Reset password</Typography>
-                </Link>
-
-                {/* Switch to Register */}
+                {/* Back to Login */}
                 <Typography variant="body1" sx={{ textAlign: "center", mt: 3 }}>
-                    No account?{" "}
+                    Remember your password?{" "}
                     <Link
                         component="button"
                         type="button"
-                        onClick={handleSwitchToRegister}
+                        onClick={handleSwitchToLogin}
                         sx={{
                             fontWeight: 900,
                             fontFamily: "'Archivo Black', sans-serif",
@@ -190,7 +154,7 @@ const LoginModal = ({
                             "&:hover": { color: "accent.yellowDark" },
                         }}
                     >
-                        Create one
+                        Back to login
                     </Link>
                 </Typography>
             </Box>
@@ -198,4 +162,4 @@ const LoginModal = ({
     );
 };
 
-export default LoginModal;
+export default ResetPasswordModal;

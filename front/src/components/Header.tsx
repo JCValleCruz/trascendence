@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Box,
-    Typography,
     AppBar,
     Toolbar,
     IconButton,
@@ -11,41 +10,14 @@ import {
     Divider,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { styled, keyframes } from "@mui/material/styles";
+import {
+    MarqueeContainer,
+    MarqueeTrack,
+    MarqueeContent,
+} from "../style/MarqueeStyle";
 import LoginModal from "./LoginModal";
 import RegisterModal from "./RegisterModal";
-
-// Styled Components
-const marquee = keyframes`
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-`;
-
-const MarqueeContainer = styled(Box)({
-    backgroundColor: "black",
-    color: "white",
-    overflow: "hidden",
-    flexGrow: 1,
-    display: "flex",
-    alignItems: "center",
-    height: "100%",
-    position: "relative",
-});
-
-const MarqueeTrack = styled(Box)({
-    display: "flex",
-    width: "max-content",
-    animation: `${marquee} 50s linear infinite`,
-});
-
-const MarqueeContent = styled(Typography)({
-    fontSize: "0.875rem",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: "0.1em",
-    whiteSpace: "nowrap",
-    flexShrink: 0,
-});
+import ResetPasswordModal from "./ResetPasswordModal";
 
 const Header = () => {
     const navigate = useNavigate();
@@ -54,6 +26,7 @@ const Header = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [loginModalOpen, setLoginModalOpen] = useState(false);
     const [registerModalOpen, setRegisterModalOpen] = useState(false);
+    const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
 
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -65,13 +38,7 @@ const Header = () => {
 
     const handleNavigate = (path: string) => {
         handleMenuClose();
-        navigate(path); // Uncomment when ready
-    };
-
-    // Auth handlers
-    const handleOpenLoginModal = () => {
-        handleMenuClose();
-        setLoginModalOpen(true);
+        // navigate(path); // Uncomment when ready
     };
 
     const handleLogin = async (email: string, password: string) => {
@@ -107,14 +74,32 @@ const Header = () => {
         }
     };
 
+    const handleResetPassword = async (
+        email: string,
+    ) => {
+        try {
+            console.log("Reset password attempt:", email);
+            // TODO: Add your actual reset API call here??
+        } catch (error) {
+            console.error("Reset password failed:", error);
+            throw error;
+        }
+    };
+
+    const handleSwitchToLogin = () => {
+        setRegisterModalOpen(false);
+        setResetPasswordModalOpen(false);
+        setLoginModalOpen(true);
+    };
+
     const handleSwitchToRegister = () => {
         setLoginModalOpen(false);
         setRegisterModalOpen(true);
     };
 
-    const handleSwitchToLogin = () => {
-        setRegisterModalOpen(false);
-        setLoginModalOpen(true);
+    const handleSwitchToResetPassword = () => {
+        setLoginModalOpen(false);
+        setResetPasswordModalOpen(true);
     };
 
     const handleLogout = () => {
@@ -163,12 +148,12 @@ const Header = () => {
                             <MarqueeContent>
                                 Pong Tournament • Join the Arena • Win • Glory •
                                 Pong Tournament • Join the Arena • Win • Glory •
-                                Pong Tournament • Join the Arena • Win • Glory •
+                                Pong Tournament • Join the Arena • Win • Glory • 
                             </MarqueeContent>
                             <MarqueeContent>
                                 Pong Tournament • Join the Arena • Win • Glory •
                                 Pong Tournament • Join the Arena • Win • Glory •
-                                Pong Tournament • Join the Arena • Win • Glory •
+                                Pong Tournament • Join the Arena • Win • Glory • 
                             </MarqueeContent>
                         </MarqueeTrack>
                     </MarqueeContainer>
@@ -231,7 +216,12 @@ const Header = () => {
                 {/* Conditional rendering based on login status */}
                 {!isLoggedIn ? (
                     <>
-                        <MenuItem onClick={handleOpenLoginModal}>
+                        <MenuItem
+                            onClick={() => {
+                                handleMenuClose();
+                                setLoginModalOpen(true);
+                            }}
+                        >
                             Login
                         </MenuItem>
                         <Divider
@@ -292,6 +282,7 @@ const Header = () => {
                 onClose={() => setLoginModalOpen(false)}
                 onLogin={handleLogin}
                 onSwitchToRegister={handleSwitchToRegister}
+                onSwitchToResetPassword={handleSwitchToResetPassword}
             />
 
             {/* Register Modal */}
@@ -299,6 +290,14 @@ const Header = () => {
                 open={registerModalOpen}
                 onClose={() => setRegisterModalOpen(false)}
                 onRegister={handleRegister}
+                onSwitchToLogin={handleSwitchToLogin}
+            />
+
+            {/* Reset Password Modal */}
+            <ResetPasswordModal
+                open={resetPasswordModalOpen}
+                onClose={() => setResetPasswordModalOpen(false)}
+                onResetPassword={handleResetPassword}
                 onSwitchToLogin={handleSwitchToLogin}
             />
         </>

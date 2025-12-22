@@ -57,7 +57,9 @@ export const StyledTextField = styled(TextField)(({ theme }) => ({
         fontWeight: "bold",
         textTransform: "uppercase",
         fontSize: "0.875rem",
-        color: theme.palette.grey[400],
+        "&.Mui-focused, &.MuiInputLabel-shrink": {
+            transform: "translate(16px, -16px) scale(0.75)",
+        },
     },
     "& input": {
         padding: "16px",

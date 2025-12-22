@@ -11,13 +11,17 @@ import {
     StyledDialog,
     StyledTextField,
     PrimaryAuthButton,
-    OAuthButton,
 } from "../style/AuthModalStyle";
+import { validateEmail } from "../utils/validation";
 
 interface Props {
     open: boolean;
     onClose: () => void;
-    onRegister: (username: string, email: string, password: string) => Promise<void>;
+    onRegister: (
+        username: string,
+        email: string,
+        password: string
+    ) => Promise<void>;
     onSwitchToLogin: () => void;
     isLoading?: boolean;
     error?: string;
@@ -34,6 +38,7 @@ const RegisterModal = ({
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [emailError, setEmailError] = useState("");
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -46,6 +51,7 @@ const RegisterModal = ({
             setUsername("");
             setEmail("");
             setPassword("");
+            setEmailError("");
             onClose();
         }
     };
@@ -54,6 +60,7 @@ const RegisterModal = ({
         setUsername("");
         setEmail("");
         setPassword("");
+        setEmailError("");
         onSwitchToLogin();
     };
 
@@ -79,13 +86,6 @@ const RegisterModal = ({
                     </Typography>
                 </Box>
 
-                {/* OAuth Button */}
-                <Stack spacing={2} sx={{ mb: 3 }}>
-                    <OAuthButton startIcon={<span>G</span>}>
-                        <Typography variant="subtitle1">Continue with Google</Typography>
-                    </OAuthButton>
-                </Stack>
-
                 {/* Error Alert */}
                 {error && (
                     <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>
@@ -101,11 +101,16 @@ const RegisterModal = ({
                             type="email"
                             label="EMAIL"
                             name="email"
-                            autoComplete="email"
+                            autoComplete="off"
                             value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            onChange={(e) => {
+                                setEmail(e.target.value);
+                                setEmailError(validateEmail(e.target.value));
+                            }}
                             disabled={isLoading}
                             required
+                            error={!!emailError}
+                            helperText={emailError}
                         />
                         <StyledTextField
                             fullWidth
@@ -132,11 +137,16 @@ const RegisterModal = ({
 
                         <PrimaryAuthButton
                             type="submit"
-                            disabled={isLoading || !username || !email || !password}
+                            disabled={
+                                isLoading || !username || !email || !password
+                            }
                             sx={{ mt: 3 }}
                         >
                             {isLoading ? (
-                                <CircularProgress size={24} sx={{ color: "secondary.main" }} />
+                                <CircularProgress
+                                    size={24}
+                                    sx={{ color: "secondary.main" }}
+                                />
                             ) : (
                                 "Sign Up"
                             )}
