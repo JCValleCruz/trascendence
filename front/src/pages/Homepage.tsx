@@ -7,6 +7,7 @@ import CardGrid from "../components/CardGrid";
 
 const Homepage = () => {
     return (
+		
         <Box sx={{ p: 4 }}>
             
             {/* BOTONES DE ARRIBA (Esto se queda igual) */}

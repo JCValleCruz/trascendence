@@ -29,10 +29,9 @@ const router = createBrowserRouter([
                 element: <MainPage />, // Capa 2: Layout (Header + Outlet + Footer)
                 children: [
                     {
-                        index: true, // <--- ESTO ES LA CLAVE
+                      	path: "/" ,// <--- ESTO ES LA CLAVE
                         element: <Homepage />, // Capa 3: Contenido inicial (Tus cartas)
                     },
-                  
                 ],
             },
         ],
