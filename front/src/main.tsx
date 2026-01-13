@@ -8,7 +8,7 @@ import Frontend from "./Frontend";
 
 // Importa tus páginas
 import MainPage from "./pages/MainPage";
-import Homepage from "./pages/Homepage"; // <--- IMPORTANTE: Importa el archivo de las cartas
+import GamesPage from "./pages/GamesPage";
 
 const AppWithTheme = () => {
     return (
@@ -25,12 +25,12 @@ const router = createBrowserRouter([
         element: <Frontend />, // Capa 1: Base
         children: [
             {
-                path: "/", 
+                path: "/",
                 element: <MainPage />, // Capa 2: Layout (Header + Outlet + Footer)
                 children: [
                     {
-                      	path: "/" ,// <--- ESTO ES LA CLAVE
-                        element: <Homepage />, // Capa 3: Contenido inicial (Tus cartas)
+                        path: "/",
+                        element: <GamesPage />,
                     },
                 ],
             },
