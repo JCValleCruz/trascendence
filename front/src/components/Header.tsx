@@ -225,7 +225,7 @@ const Header = () => {
                         <Divider
                             sx={{
                                 borderColor: "primary.light",
-                                borderBottomWidth: 5,
+                                borderBottomWidth: 3,
                             }}
                         />
                         <MenuItem
@@ -254,7 +254,7 @@ const Header = () => {
                     Rankings
                 </MenuItem>
                 <Divider
-                    sx={{ borderColor: "primary.light", borderBottomWidth: 5 }}
+                    sx={{ borderColor: "primary.light", borderBottomWidth: 3 }}
                 />
                 <MenuItem onClick={() => handleNavigate("/social")}>
                     Social 
