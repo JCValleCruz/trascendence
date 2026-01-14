@@ -144,10 +144,23 @@ const GamePanel: React.FC<GamePanelProps> = ({
   const baseBgColor = isLeft ? 'common.black' : '#0a0a0a';
   const highlightColor = isLeft ? 'grey.400' : 'grey.500';
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const topThreshold = rect.height * 0.15; // 15% top margin
+    const bottomThreshold = rect.height * 0.85; // 15% bottom margin
+
+    if (y > topThreshold && y < bottomThreshold) {
+      if (!isActive) onHover();
+    } else {
+      if (isActive) onLeave();
+    }
+  };
+
   return (
     <Box
       component="section"
-      onMouseEnter={onHover}
+      onMouseMove={handleMouseMove}
       onMouseLeave={onLeave}
       sx={{
         position: 'relative',

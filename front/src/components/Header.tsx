@@ -245,32 +245,19 @@ const Header = () => {
                     sx={{ borderColor: "primary.main", borderBottomWidth: 3 }}
                 />
                 <MenuItem onClick={() => handleNavigate("/profile")}>
-                    My Profile
+                    Profile
                 </MenuItem>
                 <Divider
                     sx={{ borderColor: "primary.dark", borderBottomWidth: 3 }}
                 />
                 <MenuItem onClick={() => handleNavigate("/stats")}>
-                    Stats
+                    Rankings
                 </MenuItem>
                 <Divider
                     sx={{ borderColor: "primary.light", borderBottomWidth: 5 }}
                 />
-                <MenuItem onClick={() => handleNavigate("/pong")}>
-                    Pong
-                </MenuItem>
-                <Divider
-                    sx={{ borderColor: "primary.main", borderBottomWidth: 3 }}
-                />
-                <MenuItem onClick={() => handleNavigate("/other-game")}>
-                    Other Game
-                </MenuItem>
-                <Divider
-                    sx={{ borderColor: "primary.dark", borderBottomWidth: 3 }}
-                />
-
                 <MenuItem onClick={() => handleNavigate("/social")}>
-                    Social
+                    Social 
                 </MenuItem>
             </Menu>
 
