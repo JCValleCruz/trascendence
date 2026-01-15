@@ -10,6 +10,7 @@ services:
     networks:
       - trascendence-network
 
+
   backend:
     build:
       context: ./back
@@ -24,8 +25,27 @@ services:
       - ./back/src/.env # Carga las variables desde back/src/.env
     environment:
       - NODE_ENV=development
+    restart: on-failure
     networks:
       - trascendence-network
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: always
+    environment:
+      # Tienen que coincidir con tu .env
+      - MYSQL_DATABASE=transcendence      # Igual a DB_NAME
+      - MYSQL_USER=transcendence42        # Igual a DB_USER
+      - MYSQL_PASSWORD=transcendence42    # Igual a DB_PASSWORD
+      - MYSQL_ROOT_PASSWORD=root_secret   # Contraseña para el usuario root (opcional pero recomendada)
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - trascendence-network
+
+volumes:
+    mariadb_data:
 
 networks:
   trascendence-network:

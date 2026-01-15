@@ -41,42 +41,69 @@ const Header = () => {
         // navigate(path); // Uncomment when ready
     };
 
+    // --- CORREGIDO AQUÍ ---
     const handleLogin = async (email: string, password: string) => {
-        // TODO: Replace with actual API call
         console.log("Login attempt:", email, password);
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
 
-        // Simulate API call
-        // const response = await fetch('/api/auth/login', { ... });
-        // if (response.ok) {
-        //     const data = await response.json();
-        //     // Store token, user data, etc.
-        // }
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error desconocido en el servidor');
+            }
 
-        // On success:
-        setIsLoggedIn(true);
-        setLoginModalOpen(false);
-    };
+            setIsLoggedIn(true);
+            setLoginModalOpen(false);
 
+        } catch (error) {
+            console.error('Error en login:', error);
+        } // <--- FALTABA CERRAR EL CATCH
+    }; // <--- FALTABA CERRAR LA FUNCIÓN handleLogin
+
+    // --- CORREGIDO: handleRegister ahora está fuera de handleLogin ---
     const handleRegister = async (
         username: string,
         email: string,
         password: string
     ) => {
         try {
-            console.log("Register attempt:", username, email, password);
-            // TODO: Add your actual register API call here
+            const response = await fetch('http://localhost:3000/api/auth/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    email: email,
+                    password: password
+                })
+            });
 
-            setIsLoggedIn(true);
-            setRegisterModalOpen(false);
-        } catch (error) {
-            console.error("Registration failed:", error);
-            throw error;
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Error desconocido en el servidor');
+            }
+
+            const data = await response.json();
+            console.log('✅ Usuario registrado:', data);
+            handleSwitchToLogin();
+            return data;
+
+        } catch (error: any) { // Añadido :any para evitar quejas de TS
+            console.error('❌ Fallo en la matrix:', error.message);
         }
     };
 
-    const handleResetPassword = async (
-        email: string,
-    ) => {
+    const handleResetPassword = async (email: string) => {
         try {
             console.log("Reset password attempt:", email);
             // TODO: Add your actual reset API call here??
@@ -103,7 +130,6 @@ const Header = () => {
     };
 
     const handleLogout = () => {
-        // TODO: Clear session, tokens, etc.
         setIsLoggedIn(false);
         handleMenuClose();
         navigate("/");
@@ -121,7 +147,7 @@ const Header = () => {
                     boxShadow: "none",
                 }}
             >
-                <Toolbar disableGutters variant="dense" sx={{ minHeight: 48,  px: 0, gap: 0 }}>
+                <Toolbar disableGutters variant="dense" sx={{ minHeight: 48, px: 0, gap: 0 }}>
                     {/* Logo */}
                     <Box
                         component="img"
@@ -211,7 +237,6 @@ const Header = () => {
                     },
                 }}
             >
-                {/* Conditional rendering based on login status */}
                 {!isLoggedIn ? (
                     <>
                         <MenuItem
@@ -257,7 +282,7 @@ const Header = () => {
                     sx={{ borderColor: "primary.light", borderBottomWidth: 3 }}
                 />
                 <MenuItem onClick={() => handleNavigate("/social")}>
-                    Social 
+                    Social
                 </MenuItem>
             </Menu>
 
