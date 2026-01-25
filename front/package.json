@@ -20,6 +20,7 @@
 		"@mui/material": "^7.3.6",
 		"@mui/styled-engine": "^7.3.6",
 		"@vitejs/plugin-react": "^5.1.2",
+		"jwt-decode": "^4.0.0",
 		"react": "^19.2.3",
 		"react-dom": "^19.2.3",
 		"react-router-dom": "^7.10.1"
