@@ -85,6 +85,7 @@ const GamesPage: React.FC = () => {
                 isPeerActive={leftActive}
                 onHover={() => setRightActive(true)}
                 onLeave={() => setRightActive(false)}
+				//onOptionSelect={handlePongSelection}
             />
         </Box>
     );
