@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Box } from '@mui/material';
 import GamePanel from '../components/GamePanel';
 import ScoreModal from '../components/ScoreModal';
-import { loadGame } from '../game';
+import PongGame from '../components/PongGame';
 
 const GamesPage: React.FC = () => {
     const [leftActive, setLeftActive] = useState(false);
@@ -11,7 +11,10 @@ const GamesPage: React.FC = () => {
 	const [modalOpen, setModalOpen] = useState(false);
     const [selectedMode, setSelectedMode] = useState<'pvp' | 'ai' | null>(null);
 
-    const handlePongSelection = (option: string) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [scoreToWin, setScoreToWin] = useState(5);
+	
+	const handlePongSelection = (option: string) => {
 		const modeStr = option.trim().toUpperCase();
         let mode: 'pvp' | 'ai' | null = null;
         if (modeStr === 'IA')
@@ -27,10 +30,27 @@ const GamesPage: React.FC = () => {
 
     const handleStartGame = (score: number) => {
 		if (selectedMode) {
+			setScoreToWin(score);
 			setModalOpen(false);
-            loadGame(selectedMode, score);
+            setIsPlaying(true);
         } 
     };
+
+	const handleExitGame = () => {
+        setIsPlaying(false);
+    };
+
+	if (isPlaying && selectedMode) {
+        return (
+            <Box sx={{ width: '100%', height: '100vh', bgcolor: 'black', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <PongGame 
+                    mode={selectedMode} 
+                    scoreToWin={scoreToWin} 
+                    onExit={handleExitGame} 
+                />
+            </Box>
+        );
+    }
 
     return (
         <Box sx={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: { xs: 'column', md: 'row' }, bgcolor: 'common.black' }}>
@@ -65,6 +85,7 @@ const GamesPage: React.FC = () => {
                 isPeerActive={leftActive}
                 onHover={() => setRightActive(true)}
                 onLeave={() => setRightActive(false)}
+				//onOptionSelect={handlePongSelection}
             />
         </Box>
     );

@@ -1,3 +1,4 @@
+import { jwtDecode } from "jwt-decode";
 import { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
@@ -8,6 +9,9 @@ import {
     Menu,
     MenuItem,
     Divider,
+    Snackbar,
+    Alert,
+    Avatar
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
@@ -21,42 +25,67 @@ import RegisterModal from "./RegisterModal";
 import ResetPasswordModal from "./ResetPasswordModal";
 import AuthErrorNotification from "./AuthErrorNotification";
 
+interface UserPayload {
+    id: number;
+    username: string;
+    email: string;
+}
+
 const Header = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
     
-    // --- ESTADOS DE NAVEGACIÓN Y MODALES ---
+    // --- ESTADOS ---
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [user, setUser] = useState<UserPayload | null>(null);
+
+    // Modales
     const [loginModalOpen, setLoginModalOpen] = useState(false);
     const [registerModalOpen, setRegisterModalOpen] = useState(false);
     const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
 
-    // --- ESTADO ÚNICO DE ERROR (Limpieza hecha aquí) ---
+    // Notificaciones
     const [authError, setAuthError] = useState({ open: false, message: "" });
+    const [successMsg, setSuccessMsg] = useState({ open: false, message: "" });
 
-    // Función para disparar el error desde cualquier sitio
-    const triggerError = (message: string) => {
-        setAuthError({ open: true, message });
-    };
+    // --- EFECTOS (Persistencia y OAuth) ---
+    useEffect(() => {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+            try {
+                const decoded = jwtDecode<UserPayload>(token);
+                setUser(decoded);
+            } catch (e) {
+                localStorage.removeItem('auth_token');
+                setUser(null);
+            }
+        }
+    }, []);
 
-    // --- EFECTO PARA OAUTH (ERRORES DE URL) ---
     useEffect(() => {
         const errorType = searchParams.get("error");
         if (errorType) {
             const message = errorType === "user_exists" 
-                ? "Este email ya está registrado con otro método" 
-                : "Error de autenticación con el proveedor externo";
-            
-            triggerError(message);
-            setSearchParams({}); // Limpia la URL
+                ? "Email already registered" 
+                : "External auth error";
+            setAuthError({ open: true, message });
+            setSearchParams({});
         }
     }, [searchParams, setSearchParams]);
 
     // --- HANDLERS ---
     const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
     const handleMenuClose = () => setAnchorEl(null);
+    
+    const handleNavigate = (path: string) => {
+        handleMenuClose();
+        navigate(path);
+    };
 
+    const triggerSuccess = (msg: string) => setSuccessMsg({ open: true, message: msg });
+    const triggerError = (msg: string) => setAuthError({ open: true, message: msg });
+
+    // --- AUTH LOGIC ---
     const handleLogin = async (email: string, password: string) => {
         try {
             const response = await fetch('http://localhost:3000/api/auth/login', {
@@ -64,14 +93,16 @@ const Header = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
+            const data = await response.json();
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Credenciales incorrectas');
-            }
+            if (!response.ok) throw new Error(data.message || data.error || 'Credential error');
 
-            setIsLoggedIn(true);
+            localStorage.setItem('auth_token', data.token);
+            const decoded = jwtDecode<UserPayload>(data.token);
+            setUser(decoded);
+            
             setLoginModalOpen(false);
+            triggerSuccess(`¡Welcome, ${decoded.username}!`);
         } catch (error: any) {
             triggerError(error.message);
         }
@@ -86,40 +117,30 @@ const Header = () => {
             });
 
             if (response.status === 409) {
-                triggerError("El nombre de usuario o email ya están en uso");
+                triggerError("User or email already exists");
                 return;
             }
+            if (!response.ok) throw new Error("Register error");
 
-            if (!response.ok) throw new Error("Error en el registro");
-
-            handleSwitchToLogin();
+            setRegisterModalOpen(false);
+            setLoginModalOpen(true);
+            triggerSuccess("Account created, please log in");
         } catch (error: any) {
-            triggerError(error.message || "Fallo de conexión");
+            triggerError(error.message);
         }
     };
 
-    // --- NAVEGACIÓN ENTRE MODALES ---
-    const handleSwitchToLogin = () => {
-        setRegisterModalOpen(false);
-        setResetPasswordModalOpen(false);
-        setLoginModalOpen(true);
-    };
-
-    const handleSwitchToRegister = () => {
-        setLoginModalOpen(false);
-        setRegisterModalOpen(true);
-    };
-
-    const handleSwitchToResetPassword = () => {
-        setLoginModalOpen(false);
-        setResetPasswordModalOpen(true);
-    };
-
     const handleLogout = () => {
-        setIsLoggedIn(false);
+        localStorage.removeItem('auth_token');
+        setUser(null);
         handleMenuClose();
         navigate("/");
+        triggerSuccess("Logged out correctly");
     };
+
+    const handleSwitchToLogin = () => { setRegisterModalOpen(false); setResetPasswordModalOpen(false); setLoginModalOpen(true); };
+    const handleSwitchToRegister = () => { setLoginModalOpen(false); setRegisterModalOpen(true); };
+    const handleSwitchToResetPassword = () => { setLoginModalOpen(false); setResetPasswordModalOpen(true); };
 
     return (
         <>
@@ -131,51 +152,75 @@ const Header = () => {
                             <MarqueeContent>Pong Tournament • Join the Arena • Win • Glory • </MarqueeContent>
                         </MarqueeTrack>
                     </MarqueeContainer>
-                    <IconButton onClick={handleMenuOpen} sx={{ width: 48, bgcolor: "primary.main", borderRadius: 0 }}>
-                        <MenuIcon sx={{ color: "background.default" }} />
+
+                    {/* BOTÓN DEL MENÚ (ICONO vs AVATAR) */}
+                    <IconButton 
+                        onClick={handleMenuOpen} 
+                        sx={{ 
+                            width: 48, 
+                            height: "100%",
+                            bgcolor: "primary.main", 
+                            borderLeft: "2px solid", 
+                            borderRadius: 0, 
+                            "&:hover": { bgcolor: "grey.900" }, 
+                            flexShrink: 0 
+                        }}
+                    >
+                        {user ? (
+                            <Avatar 
+                                sx={{ 
+                                    width: 32, 
+                                    height: 32, 
+                                    bgcolor: "secondary.main",
+                                    color: "primary.dark",
+                                    fontWeight: "bold",
+                                    fontSize: "1.2rem",
+                                    border: "2px solid #000"
+                                }}
+                            >
+                                {user.username.charAt(0).toUpperCase()}
+                            </Avatar>
+                        ) : (
+                            <MenuIcon sx={{ color: "background.default" }} />
+                        )}
                     </IconButton>
                 </Toolbar>
             </AppBar>
 
-            {/* Menú Dropdown simplificado */}
-            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose} sx={{ mt: 5 }}>
-                {!isLoggedIn ? (
-                    <>
-                        <MenuItem onClick={() => { handleMenuClose(); setLoginModalOpen(true); }}>Login</MenuItem>
-                        <MenuItem onClick={() => { handleMenuClose(); setRegisterModalOpen(true); }}>Register</MenuItem>
-                    </>
-                ) : (
-                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            {/* MENÚ DESPLEGABLE */}
+            <Menu 
+                anchorEl={anchorEl} 
+                open={Boolean(anchorEl)} 
+                onClose={handleMenuClose} 
+                sx={{ mt: 5 }}
+            >
+                {!user && <MenuItem onClick={() => { handleMenuClose(); setLoginModalOpen(true); }}>Login</MenuItem>}
+                {!user && <MenuItem onClick={() => { handleMenuClose(); setRegisterModalOpen(true); }}>Register</MenuItem>}
+                
+                {!user && <Divider />}
+                {!user && <MenuItem onClick={() => handleNavigate("/stats")}>Rankings</MenuItem>}
+
+                {user && (
+                    <MenuItem disabled sx={{ opacity: "1 !important", color: "primary.main", fontWeight: "bold" }}>
+                        Hola, {user.username}
+                    </MenuItem>
                 )}
+                {user && <MenuItem onClick={() => handleNavigate("/profile")}>Profile</MenuItem>}
+                {user && <MenuItem onClick={() => handleNavigate("/social")}>Social</MenuItem>}
+                
+                {user && <Divider />}
+                {user && <MenuItem onClick={handleLogout}>Logout</MenuItem>}
             </Menu>
 
-            {/* Modales */}
-            <LoginModal 
-                open={loginModalOpen} 
-                onClose={() => setLoginModalOpen(false)} 
-                onLogin={handleLogin} 
-                onSwitchToRegister={handleSwitchToRegister} 
-                onSwitchToResetPassword={handleSwitchToResetPassword} 
-            />
-            <RegisterModal 
-                open={registerModalOpen} 
-                onClose={() => setRegisterModalOpen(false)} 
-                onRegister={handleRegister} 
-                onSwitchToLogin={handleSwitchToLogin} 
-            />
-            <ResetPasswordModal 
-                open={resetPasswordModalOpen} 
-                onClose={() => setResetPasswordModalOpen(false)} 
-                onResetPassword={() => {}} 
-                onSwitchToLogin={handleSwitchToLogin} 
-            />
+            {/* MODALES Y NOTIFICACIONES */}
+            <LoginModal open={loginModalOpen} onClose={() => setLoginModalOpen(false)} onLogin={handleLogin} onSwitchToRegister={handleSwitchToRegister} onSwitchToResetPassword={handleSwitchToResetPassword} />
+            <RegisterModal open={registerModalOpen} onClose={() => setRegisterModalOpen(false)} onRegister={handleRegister} onSwitchToLogin={handleSwitchToLogin} />
+            <ResetPasswordModal open={resetPasswordModalOpen} onClose={() => setResetPasswordModalOpen(false)} onResetPassword={() => {}} onSwitchToLogin={handleSwitchToLogin} />
 
-            {/* NOTIFICACIÓN ÚNICA (La solución definitiva) */}
-            <AuthErrorNotification 
-                open={authError.open} 
-                message={authError.message} 
-                onClose={() => setAuthError({ ...authError, open: false })} 
-            />
+            <AuthErrorNotification open={authError.open} message={authError.message} onClose={() => setAuthError({ ...authError, open: false })} />
+            <Snackbar open={successMsg.open} autoHideDuration={4000} onClose={() => setSuccessMsg({ ...successMsg, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+                <Alert severity="success" sx={{ width: '100%', fontWeight: 'bold' }}>{successMsg.message}</Alert>
+            </Snackbar>
         </>
     );
 };
