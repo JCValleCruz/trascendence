@@ -4,9 +4,12 @@ import cookie from '@fastify/cookie';
 import fastifyWebsocket from '@fastify/websocket';
 import fastifyJwt from '@fastify/jwt';
 import dotenv from 'dotenv';
+
 import authRoutes from './apis/auth.api.js';
 import userRoutes from './apis/user.api.js';
 import gameRoutes from './apis/game.api.js';
+import friendRoutes from './apis/friend.api.js';
+
 import { API_ROUTES } from './routes/routes.js';
 
 dotenv.config();
@@ -56,6 +59,7 @@ export const createAPIServer = async (): Promise<FastifyInstance> => {
 	await app.register(authRoutes, { prefix: API_ROUTES.auth });
 	await app.register(userRoutes, { prefix: API_ROUTES.user });
 	await app.register(gameRoutes, { prefix: '/api/game' });
+	await app.register(friendRoutes, { prefix: API_ROUTES.friend });
 
 	// Fastify parsea JSON nativamente, no necesitas "app.use(express.json())"
 

@@ -22,7 +22,11 @@ PROFILE{
 	Username - l
 	Email
 	Change Password **
-	Friends 
+	Friends -- Tiene un buscador 
+	Social -> |           | (lupa)
+		      >Online
+			  >Offline
+			  >Pending	
 	Blocked
 	Points DEPENDIENDO del modo / dificultad ?
 	(micro transaction SHOP)

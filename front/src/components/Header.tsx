@@ -25,6 +25,8 @@ import RegisterModal from "./RegisterModal";
 import ResetPasswordModal from "./ResetPasswordModal";
 import AuthErrorNotification from "./AuthErrorNotification";
 import UserList from "./UserList";
+import { SocialPanel } from "./SocialPanel";
+
 
 interface UserPayload {
 	id: number;
@@ -46,6 +48,7 @@ const Header = () => {
 	const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
 
 	const [verUsuarios, setVerUsuarios] = useState(false);
+	const [socialOpen, setSocialOpen] = useState(false);
 
 	// Notificaciones
 	const [authError, setAuthError] = useState({ open: false, message: "" });
@@ -209,7 +212,7 @@ const Header = () => {
 					</MenuItem>
 				)}
 				{user && <MenuItem onClick={() => handleNavigate("/profile")}>Profile</MenuItem>}
-				{user && <MenuItem onClick={() => handleNavigate("/social")}>Social</MenuItem>}
+				{user && <MenuItem onClick={() => { handleMenuClose(); setSocialOpen(!socialOpen); }}>Social</MenuItem>}
 				{user && (
 					<MenuItem onClick={() => { handleMenuClose(); setVerUsuarios(true); }}>
 						Admin: Ver Lista Usuarios
@@ -227,6 +230,11 @@ const Header = () => {
 				<Box sx={{ p: 4, bgcolor: 'background.paper', mt: 10 }}>
 					<button onClick={() => setVerUsuarios(false)}>Cerrar Lista</button>
 					<UserList />
+				</Box>
+			)}
+			{socialOpen && (
+				<Box sx={{ position: 'fixed', right: 20, top: 70, zIndex: 1200 }}>
+					<SocialPanel />
 				</Box>
 			)}
 			<AuthErrorNotification open={authError.open} message={authError.message} onClose={() => setAuthError({ ...authError, open: false })} />

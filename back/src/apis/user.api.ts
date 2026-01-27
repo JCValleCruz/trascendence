@@ -80,15 +80,37 @@ const userRoutes: FastifyPluginAsync = async (fastify, opts) => {
 		}
 	});
 
-	
-	fastify.addHook('preHandler', authenticate); 
-    // Ruta de prueba
-   /*  fastify.get("/profile", async (req, reply) => {
-        const user = req.user;
-        return { mensaje: "Si lees esto, es que tienes llave", user };
-    }); */
+	// user.api.ts
 
-	
+	// Nuevo Endpoint de búsqueda
+	fastify.get('/search', async (request, reply) => {
+		const { q } = request.query as { q: string };
+
+		if (!q || q.length < 2) return [];
+
+		try {
+			// Buscamos usuarios que coincidan con el nombre
+			const [rows] = await pool.execute(
+				'SELECT id, username, avatar_url, is_online FROM users WHERE username LIKE ? LIMIT 5',
+				[`%${q}%`]
+			);
+			// Nos aseguramos de devolver SIEMPRE un array, aunque esté vacío
+			return rows || [];
+		} catch (error: any) {
+			request.log.error(error);
+			return []; // Devolvemos array vacío en lugar de error para que el front no pete
+		}
+	});
+
+
+	fastify.addHook('preHandler', authenticate);
+	// Ruta de prueba
+	/*  fastify.get("/profile", async (req, reply) => {
+		 const user = req.user;
+		 return { mensaje: "Si lees esto, es que tienes llave", user };
+	 }); */
+
+
 };
 
 export default userRoutes;
