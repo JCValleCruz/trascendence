@@ -43,7 +43,15 @@ export const createAPIServer = async (): Promise<FastifyInstance> => {
 		console.log("📦 Usando fastifyWebsocket directo");
 		await app.register(fastifyWebsocket);
 	}
-
+	/* 
+	Para conectarse desde remoto la segunda IP que dan "Server listening at http://10.13.9.6:3000"
+	app.get('/', async () => {
+			return { 
+				status: "online", 
+				message: "Bienvenido a la API de 42 Málaga",
+				version: "1.0.0" 
+			};
+		}); */
 	//registramos las rutas
 	await app.register(authRoutes, { prefix: API_ROUTES.auth });
 	await app.register(userRoutes, { prefix: API_ROUTES.user });

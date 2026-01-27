@@ -105,6 +105,7 @@ const authRoutes: FastifyPluginAsync = async (fastify, opts) => {
 		}
 		if (!code) return reply.redirect(`${FRONTEND_URL}?error=oauth_failed`);
 
+
 		try {
 			// A. Obtener Token de GitHub
 			const tokenResponse = await fetch("https://github.com/login/oauth/access_token", {
@@ -162,7 +163,7 @@ const authRoutes: FastifyPluginAsync = async (fastify, opts) => {
 					email: user.email,
 					username: user.username
 				},
-				process.env.JWT_SECRET || 'secreto_super_seguro_para_desarrollo',
+				process.env.JWT_SECRET || 'super_secret',
 				{ expiresIn: '7d' }
 			);
 
