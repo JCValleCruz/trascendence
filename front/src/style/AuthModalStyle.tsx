@@ -1,4 +1,4 @@
-import { Dialog, TextField, Button } from "@mui/material";
+import { Dialog, TextField, Button, ButtonProps } from "@mui/material";
 import { styled, keyframes } from "@mui/material/styles";
 
 export const fadeIn = keyframes`
@@ -92,7 +92,7 @@ export const PrimaryAuthButton = styled(Button)(({ theme }) => ({
     },
 }));
 
-export const OAuthButton = styled(Button)(({ theme }) => ({
+export const OAuthButton = styled(Button)<ButtonProps>(({ theme }) => ({
     width: "100%",
     backgroundColor: theme.palette.secondary.main,
     color: theme.palette.background.default,

@@ -1,4 +1,11 @@
-import { Snackbar, Box, Typography, IconButton, Slide, type SlideProps } from "@mui/material";
+import {
+    Snackbar,
+    Box,
+    Typography,
+    IconButton,
+    Slide,
+    type SlideProps,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import { styled } from "@mui/material/styles";
@@ -9,9 +16,9 @@ interface Props {
     onClose: () => void;
 }
 
-function SlideTransition(props: SlideProps) {
+const SlideTransition = (props: SlideProps) => {
     return <Slide {...props} direction="up" />;
-}
+};
 
 const ErrorCard = styled(Box)(({ theme }) => ({
     minWidth: "300px",
@@ -38,10 +45,12 @@ const ErrorHeader = styled(Box)(({ theme }) => ({
 const AuthErrorNotification = ({ open, message, onClose }: Props) => {
     return (
         <Snackbar
-            open={open} // 2. Usamos el prop 'open'
+            open={open}
             autoHideDuration={6000}
-            onClose={onClose} // 3. Cerramos al pasar el tiempo
-            TransitionComponent={SlideTransition}
+            onClose={onClose}
+            slots={{
+                transition: SlideTransition,
+            }}
             anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
             sx={{ bottom: { xs: 20, sm: 40 } }}
         >
@@ -71,7 +80,9 @@ const AuthErrorNotification = ({ open, message, onClose }: Props) => {
                     </IconButton>
                 </ErrorHeader>
 
-                <Box sx={{ p: 2, pr: 4, display: "flex", alignItems: "center" }}>
+                <Box
+                    sx={{ p: 2, pr: 4, display: "flex", alignItems: "center" }}
+                >
                     <Typography
                         sx={{
                             color: "text.primary",

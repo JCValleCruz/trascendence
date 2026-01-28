@@ -29,8 +29,8 @@ const PongGame: React.FC<PongGameProps> = ({ mode, scoreToWin, onExit }) => {
     // Objetivo del servidor (Hacia donde vamos)
     const serverTarget = useRef({
         ball: { x: 400, y: 300 },
-        paddleLeft: { y: 265 },
-        paddleRight: { y: 265 }
+        paddleLeft: { y: 265, score: 0 },
+        paddleRight: { y: 265, score: 0 }
     });
 
     // --- ESTADO REACT (UI) ---
