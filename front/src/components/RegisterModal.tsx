@@ -11,17 +11,14 @@ import {
     StyledDialog,
     StyledTextField,
     PrimaryAuthButton,
+    OAuthButton,
 } from "../style/AuthModalStyle";
-import { validateEmail , validatePassword , validateUsername } from "../utils/validation";
+import { validateEmail } from "../utils/validation";
 
 interface Props {
     open: boolean;
     onClose: () => void;
-    onRegister: (
-        username: string,
-        email: string,
-        password: string
-    ) => Promise<void>;
+    onRegister: (username: string, email: string, pass: string) => Promise<void>;
     onSwitchToLogin: () => void;
     isLoading?: boolean;
     error?: string;
@@ -39,16 +36,11 @@ const RegisterModal = ({
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [emailError, setEmailError] = useState("");
-    const [passwordError, setPasswordError] = useState("");
-    const [usernameError, setUsernameError] = useState("");
-	
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         if (!username || !email || !password) return;
         await onRegister(username, email, password);
-		handleSwitchToLogin();
-		
     };
 
     const handleClose = () => {
@@ -57,31 +49,35 @@ const RegisterModal = ({
             setEmail("");
             setPassword("");
             setEmailError("");
-			setPasswordError("");
-			setUsernameError("");
             onClose();
         }
     };
-
-
 
     const handleSwitchToLogin = () => {
         setUsername("");
         setEmail("");
         setPassword("");
         setEmailError("");
-		setPasswordError("");
-		setUsernameError("");
         onSwitchToLogin();
+    };
+
+    // Mismo estilo forzado que en Login
+    const oAuthStyle = {
+        backgroundColor: "#000000",
+        color: "#FFFFFF",
+        border: "2px solid #000000",
+        "&:hover": {
+            backgroundColor: "#FFFFFF",
+            color: "#000000",
+        }
     };
 
     return (
         <StyledDialog open={open} onClose={handleClose}>
             <Box sx={{ p: 4 }}>
-                {/* Title */}
                 <Box sx={{ textAlign: "center", mb: 4 }}>
                     <Typography
-                        variant="subtitle1"
+                        variant="authSubtitle"
                         sx={{
                             borderBottom: "2px solid",
                             borderColor: "secondary.main",
@@ -90,29 +86,58 @@ const RegisterModal = ({
                             mb: 1,
                         }}
                     >
-                        Welcome to
+                        Sign up for
                     </Typography>
                     <Typography variant="displayTitle">
                         Transcendence
                     </Typography>
                 </Box>
 
-                {/* Error Alert */}
+                {/* BOTONES OAUTH VISIBLES */}
+                <Stack spacing={2} sx={{ mb: 3 }}>
+                    <OAuthButton 
+                        component="a" 
+                        href="http://localhost:3000/api/auth/google"
+                        sx={oAuthStyle}
+                    >
+                        Sign up with Google
+                    </OAuthButton>
+
+                    <OAuthButton 
+                        component="a" 
+                        href="http://localhost:3000/api/auth/github"
+                        sx={oAuthStyle}
+                    >
+                        Sign up with Github
+                    </OAuthButton>
+                </Stack>
+
                 {error && (
                     <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>
                         {error}
                     </Alert>
                 )}
 
-                {/* Form */}
                 <form onSubmit={handleSubmit}>
                     <Stack spacing={2}>
+                        <StyledTextField
+                            fullWidth
+                            type="text"
+                            label="USERNAME"
+                            name="username"
+                            autoComplete="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            disabled={isLoading}
+                            required
+                        />
+
                         <StyledTextField
                             fullWidth
                             type="email"
                             label="EMAIL"
                             name="email"
-                            autoComplete="off"
+                            autoComplete="email"
                             value={email}
                             onChange={(e) => {
                                 setEmail(e.target.value);
@@ -123,6 +148,7 @@ const RegisterModal = ({
                             error={!!emailError}
                             helperText={emailError}
                         />
+
                         <StyledTextField
                             fullWidth
                             type="password"
@@ -130,37 +156,14 @@ const RegisterModal = ({
                             name="password"
                             autoComplete="new-password"
                             value={password}
-                            onChange={(e) => {setPassword(e.target.value);
-                                setPassword(e.target.value);
-                                setPasswordError(validatePassword(e.target.value));
-                            }}
+                            onChange={(e) => setPassword(e.target.value)}
                             disabled={isLoading}
                             required
-                            error={!!passwordError}
-                            helperText={passwordError}
-                        />
-                        <StyledTextField
-                            fullWidth
-                            type="text"
-                            label="USERNAME"
-                            name="username"
-                            autoComplete="username"
-                            value={username}
-                            onChange={(e) => {
-                                setUsername(e.target.value);
-                                setUsernameError(validateUsername(e.target.value));
-                            }}
-                            disabled={isLoading}
-                            required
-                            error={!!usernameError}
-                            helperText={usernameError}
                         />
 
                         <PrimaryAuthButton
                             type="submit"
-                            disabled={
-                                isLoading || !username || !email || !password
-                            }
+                            disabled={isLoading || !username || !email || !password}
                             sx={{ mt: 3 }}
                         >
                             {isLoading ? (
@@ -169,13 +172,12 @@ const RegisterModal = ({
                                     sx={{ color: "secondary.main" }}
                                 />
                             ) : (
-                                "Sign Up"
+                                "Create Account"
                             )}
                         </PrimaryAuthButton>
                     </Stack>
                 </form>
 
-                {/* Switch to Login */}
                 <Typography variant="body1" sx={{ textAlign: "center", mt: 3 }}>
                     Already have an account?{" "}
                     <Link

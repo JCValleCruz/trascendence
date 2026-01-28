@@ -11,14 +11,14 @@ import {
     StyledDialog,
     StyledTextField,
     PrimaryAuthButton,
-    OAuthButton,
+    OAuthButton, 
 } from "../style/AuthModalStyle";
 import { validateEmail } from "../utils/validation";
 
 interface Props {
     open: boolean;
     onClose: () => void;
-    onLogin: (username: string, password: string) => Promise<void>;
+    onLogin: (email: string, pass: string) => Promise<void>;
     onSwitchToRegister: () => void;
     onSwitchToResetPassword: () => void;
     isLoading?: boolean;
@@ -60,10 +60,20 @@ const LoginModal = ({
         onSwitchToRegister();
     };
 
+    const oAuthStyle = {
+        backgroundColor: "#000000",
+        color: "#FFFFFF",
+        border: "2px solid #000000",
+        "&:hover": {
+            backgroundColor: "#FFFFFF",
+            color: "#000000",
+        }
+    };
+
     return (
         <StyledDialog open={open} onClose={handleClose}>
             <Box sx={{ p: 4 }}>
-                {/* Title */}
+                {/* --- TÍTULO --- */}
                 <Box sx={{ textAlign: "center", mb: 4 }}>
                     <Typography
                         variant="authSubtitle"
@@ -82,28 +92,33 @@ const LoginModal = ({
                     </Typography>
                 </Box>
 
-                {/* OAuth Buttons */}
+                {/* --- BOTONES OAUTH VISIBLES --- */}
                 <Stack spacing={2} sx={{ mb: 3 }}>
-                    <OAuthButton startIcon={<span>G</span>}>
-                        <Typography variant="subtitle1">
-                            Continue with Google
-                        </Typography>
+                    <OAuthButton 
+                        component="a" 
+                        href="http://localhost:3000/api/auth/google"
+                        sx={oAuthStyle}
+                    >
+                        Continue with Google
                     </OAuthButton>
-                    <OAuthButton startIcon={<span>🐙</span>}>
-                        <Typography variant="subtitle1">
-                            Continue with Github
-                        </Typography>
+
+                    <OAuthButton 
+                        component="a" 
+                        href="http://localhost:3000/api/auth/github"
+                        sx={oAuthStyle}
+                    >
+                        Continue with Github
                     </OAuthButton>
                 </Stack>
 
-                {/* Error Alert */}
+                {/* --- ALERTA --- */}
                 {error && (
                     <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>
                         {error}
                     </Alert>
                 )}
 
-                {/* Form */}
+                {/* --- FORMULARIO --- */}
                 <form onSubmit={handleSubmit}>
                     <Stack spacing={2}>
                         <StyledTextField
@@ -151,7 +166,7 @@ const LoginModal = ({
                     </Stack>
                 </form>
 
-                {/* Reset Password Link */}
+                {/* --- RESET PASS --- */}
                 <Link
                     component="button"
                     type="button"
@@ -164,15 +179,13 @@ const LoginModal = ({
                         textDecorationThickness: "2px",
                         textUnderlineOffset: "4px",
                         color: "text.secondary",
-                        "&:hover": {
-                            color: "text.primary",
-                        },
+                        "&:hover": { color: "text.primary" },
                     }}
                 >
                     <Typography variant="subtitle1">Reset password</Typography>
                 </Link>
 
-                {/* Switch to Register */}
+                {/* --- SWITCHER --- */}
                 <Typography variant="body1" sx={{ textAlign: "center", mt: 3 }}>
                     No account?{" "}
                     <Link
