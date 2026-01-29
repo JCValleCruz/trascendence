@@ -1,67 +1,144 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import {
+    Box,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemAvatar,
+    Avatar,
+    Typography,
+    Alert,
+    CircularProgress,
+    Divider
+} from '@mui/material';
+import PersonIcon from '@mui/icons-material/Person';
+import {
+    StyledDialog,
+    PrimaryAuthButton
+} from "../style/AuthModalStyle"; // Asegúrate de que la ruta sea correcta
 
-// Definimos la interfaz basándonos en tu SELECT de user.api.ts
 interface User {
-  id: number;
-  username: string;
-  email: string;
+    id: number;
+    username: string;
+    email: string;
 }
 
-export const UserList = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [error, setError] = useState<string | null>(null);
+interface Props {
+    open: boolean;
+    onClose: () => void;
+}
 
-  const fetchUsers = async () => {
-    // 1. Recuperamos el token de donde lo hayáis guardado
-    const token = sessionStorage.getItem('auth_token');
+export const UserList = ({ open, onClose }: Props) => {
+    const [users, setUsers] = useState<User[]>([]);
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
 
-    if (!token) {
-      setError("No hay token. Por favor, inicia sesión.");
-      return;
-    }
+    // Mantenemos la lógica original de fetch
+    const fetchUsers = async () => {
+        const token = sessionStorage.getItem('auth_token');
 
-    try {
-      // 2. Petición al endpoint /api/user
-      const response = await fetch('http://localhost:3000/api/user', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`, // El prefijo que espera jwtVerify
-          'Content-Type': 'application/json'
+        if (!token) {
+            setError("No hay token. Por favor, inicia sesión.");
+            return;
         }
-      });
 
-      const data = await response.json();
+        setLoading(true);
+        try {
+            const response = await fetch('http://localhost:3000/api/user', {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-      if (!response.ok) {
-        // Si el hook authenticate falló, devolverá un 401
-        throw new Error(data.error || 'Error al cargar usuarios');
-      }
+            const data = await response.json();
 
-      // 3. Guardamos los datos de la tabla users
-      setUsers(data);
-      setError(null);
-    } catch (err: any) {
-      setError(err.message);
-      setUsers([]);
-    }
-  };
+            if (!response.ok) {
+                throw new Error(data.error || 'Error al cargar usuarios');
+            }
 
-  return (
-    <div style={{ padding: '20px', border: '1px solid #ccc' }}>
-      <button onClick={fetchUsers} style={{ cursor: 'pointer' }}>
-        Obtener Usuarios (Request al Back)
-      </button>
+            setUsers(data);
+            setError(null);
+        } catch (err: any) {
+            setError(err.message);
+            setUsers([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    // Opcional: Cargar automáticamente al abrir el modal
+    useEffect(() => {
+        if (open) {
+            fetchUsers();
+        }
+    }, [open]);
 
-      <ul>
-        {users.map((user) => (
-          <li key={user.id}>
-            <strong>{user.username}</strong> - {user.email}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+    return (
+        <StyledDialog open={open} onClose={onClose}>
+            <Box sx={{ p: 4 }}>
+                {/* CABECERA ESTILO LOGIN */}
+                <Box sx={{ textAlign: "center", mb: 3 }}>
+                    <Typography
+                        variant="authSubtitle"
+                        sx={{
+                            borderBottom: "2px solid",
+                            borderColor: "secondary.main",
+                            display: "inline-block",
+                            pb: 0.5,
+                            mb: 1,
+                        }}
+                    >
+                        Admin Panel
+                    </Typography>
+                    <Typography variant="displayTitle">
+                        User List
+                    </Typography>
+                </Box>
+
+                {error && (
+                    <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
+                )}
+
+                {/* BOTÓN REFRESH (Estilo PrimaryAuthButton) */}
+                <PrimaryAuthButton onClick={fetchUsers} disabled={loading} sx={{ mb: 3 }}>
+                    {loading ? <CircularProgress size={24} color="inherit" /> : "Refresh List"}
+                </PrimaryAuthButton>
+
+                {/* LISTA DE USUARIOS CON ESTILO */}
+                <Box sx={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #333', borderRadius: 2 }}>
+                    <List>
+                        {users.map((user, index) => (
+                            <Box key={user.id}>
+                                <ListItem>
+                                    <ListItemAvatar>
+                                        <Avatar sx={{ bgcolor: 'secondary.main', color: 'primary.main' }}>
+                                            <PersonIcon />
+                                        </Avatar>
+                                    </ListItemAvatar>
+                                    <ListItemText
+                                        primary={
+                                            <Typography variant="subtitle1" fontWeight="bold">
+                                                {user.username}
+                                            </Typography>
+                                        }
+                                        secondary={user.email}
+                                    />
+                                </ListItem>
+                                {index < users.length - 1 && <Divider component="li" />}
+                            </Box>
+                        ))}
+                        {!loading && users.length === 0 && !error && (
+                            <Typography sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
+                                No users found.
+                            </Typography>
+                        )}
+                    </List>
+                </Box>
+            </Box>
+        </StyledDialog>
+    );
 };
+
 export default UserList;

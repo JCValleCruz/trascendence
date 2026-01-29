@@ -11,7 +11,8 @@ import {
 	Divider,
 	Snackbar,
 	Alert,
-	Avatar
+	Avatar,
+	ClickAwayListener
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
@@ -55,14 +56,14 @@ const Header = () => {
 	const [successMsg, setSuccessMsg] = useState({ open: false, message: "" });
 
 	const closeAllModals = () => {
-        setLoginModalOpen(false);
-        setRegisterModalOpen(false);
-        setResetPasswordModalOpen(false);
-        setSeeAllUsers(false);
-        setSocialOpen(false);
-        // Cierra también el menú desplegable si estuviera abierto
-        setAnchorEl(null); 
-    };
+		setLoginModalOpen(false);
+		setRegisterModalOpen(false);
+		setResetPasswordModalOpen(false);
+		setSeeAllUsers(false);
+		setSocialOpen(false);
+		// Cierra también el menú desplegable si estuviera abierto
+		setAnchorEl(null);
+	};
 	// --- EFECTOS (Persistencia y OAuth) ---
 	useEffect(() => {
 		const token = sessionStorage.getItem('auth_token');
@@ -150,19 +151,19 @@ const Header = () => {
 		// pero recomendable hacerlo para poner is_online=false al instante)
 		const token = sessionStorage.getItem('auth_token');
 		if (token) {
-			fetch('http://localhost:3000/api/auth/logout', { 
+			fetch('http://localhost:3000/api/auth/logout', {
 				method: 'POST',
 				headers: { 'Authorization': `Bearer ${token}` }
 			});
 
 		}
-    // 2. Limpieza local
+		// 2. Limpieza local
 		sessionStorage.removeItem('auth_token'); // <--- IMPORTANTE: sessionStorage
 		setUser(null); // Limpiar estado de React
 		closeAllModals();
 		triggerSuccess("Logged out successfully");
 		navigate("/"); // Redirigir
-};
+	};
 
 	const handleSwitchToLogin = () => { setRegisterModalOpen(false); setResetPasswordModalOpen(false); setLoginModalOpen(true); };
 	const handleSwitchToRegister = () => { setLoginModalOpen(false); setRegisterModalOpen(true); };
@@ -232,8 +233,10 @@ const Header = () => {
 					</MenuItem>
 				)}
 				{user && <MenuItem onClick={() => handleNavigate("/profile")}>Profile</MenuItem>}
-				{user && <MenuItem onClick={() => { handleMenuClose(); 
-					setSocialOpen(!socialOpen); }}>Social</MenuItem>}
+				{user && <MenuItem onClick={() => {
+					handleMenuClose();
+					setSocialOpen(!socialOpen);
+				}}>Social</MenuItem>}
 				{user && (
 					<MenuItem onClick={() => { handleMenuClose(); setSeeAllUsers(true); }}>
 						Admin: Ver Lista Usuarios
@@ -247,17 +250,14 @@ const Header = () => {
 			<LoginModal open={loginModalOpen} onClose={() => setLoginModalOpen(false)} onLogin={handleLogin} onSwitchToRegister={handleSwitchToRegister} onSwitchToResetPassword={handleSwitchToResetPassword} />
 			<RegisterModal open={registerModalOpen} onClose={() => setRegisterModalOpen(false)} onRegister={handleRegister} onSwitchToLogin={handleSwitchToLogin} />
 			<ResetPasswordModal open={resetPasswordModalOpen} onClose={() => setResetPasswordModalOpen(false)} onResetPassword={() => { }} onSwitchToLogin={handleSwitchToLogin} />
-			{seeAllUsers && (
-				<Box sx={{ p: 4, bgcolor: 'background.paper', mt: 10 }}>
-					<button onClick={() => setSeeAllUsers(false)}>Cerrar Lista</button>
-					<UserList />
-				</Box>
-			)}
-			{socialOpen && (
-				<Box sx={{ position: 'fixed', right: 20, top: 70, zIndex: 1200 }}>
-					<SocialPanel />
-				</Box>
-			)}
+			<UserList
+				open={seeAllUsers}
+				onClose={() => setSeeAllUsers(false)}
+			/>
+			<SocialPanel
+				open={socialOpen}
+				onClose={() => setSocialOpen(false)}
+			/>
 			<AuthErrorNotification open={authError.open} message={authError.message} onClose={() => setAuthError({ ...authError, open: false })} />
 			<Snackbar open={successMsg.open} autoHideDuration={4000} onClose={() => setSuccessMsg({ ...successMsg, open: false })} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
 				<Alert severity="success" sx={{ width: '100%', fontWeight: 'bold' }}>{successMsg.message}</Alert>
