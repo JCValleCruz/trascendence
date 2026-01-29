@@ -8,6 +8,7 @@
 import { FastifyPluginAsync } from 'fastify';
 import { authenticate } from "../middleware/auth.js";
 import { pool } from '../../db/database.js';
+import * as userRepository from "../data-access/user.repository.js";
 
 // ============================================================================
 // INTERFACES
@@ -100,6 +101,17 @@ const userRoutes: FastifyPluginAsync = async (fastify, opts) => {
 			request.log.error(error);
 			return []; // Devolvemos array vacío en lugar de error para que el front no pete
 		}
+	});
+
+
+	// GET /api/user/profile
+	fastify.get("/persistence", async (req, reply) => {
+		const userToken = req.user as any; // El usuario del token
+
+		await userRepository.updateOnlineStatus(userToken.id, true);
+		await userRepository.updateLastLogin(userToken.id);
+
+		// 2. Buscamos los datos...
 	});
 
 

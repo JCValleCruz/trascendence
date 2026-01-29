@@ -11,14 +11,14 @@ const Frontend = () => {
 		if (tokenFromUrl) {
 			console.log("🔑 Token detected. Saving to SESSION storage...");
 			// CORRECCIÓN 1: Usamos sessionStorage para ser consistentes con el logout
-			sessionStorage.setItem('auth_token', tokenFromUrl);
+			localStorage.setItem('auth_token', tokenFromUrl);
 			window.history.replaceState({}, document.title, window.location.pathname);
 		}
 
 		// B. "¡ESTOY VIVO!" (Heartbeat inicial)
 		// Cada vez que se recarga la página (F5), confirmamos al back que estamos online.
 		// Esto arregla el bug de aparecer Offline tras un F5.
-		const currentToken = sessionStorage.getItem('auth_token');
+		const currentToken = localStorage.getItem('auth_token');
 		if (currentToken) {
 			// (Opcional) Podrías crear una ruta específica /heartbeat, 
 			// pero llamar a /profile o similar ya suele validar el token.
@@ -34,7 +34,7 @@ const Frontend = () => {
 	useEffect(() => {
 		// Función que se ejecuta SOLO cuando intentas cerrar la pestaña
 		const handleTabClose = () => {
-			const token = sessionStorage.getItem('auth_token'); // O sesssionstorage si decides no cambiarlo
+			const token = localStorage.getItem('auth_token'); // O sesssionstorage si decides no cambiarlo
 
 			if (token) {
 				// Usamos 'fetch' con keepalive: true

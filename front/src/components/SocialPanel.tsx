@@ -31,7 +31,7 @@ export const SocialPanel = ({ open, onClose }: Props) => {
     const [showSearch, setShowSearch] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
-    const token = sessionStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token');
 
     // --- LÓGICA ORIGINAL ---
     const fetchData = useCallback(async () => {

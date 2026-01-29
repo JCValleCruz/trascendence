@@ -35,7 +35,7 @@ export const UserList = ({ open, onClose }: Props) => {
 
     // Mantenemos la lógica original de fetch
     const fetchUsers = async () => {
-        const token = sessionStorage.getItem('auth_token');
+        const token = localStorage.getItem('auth_token');
 
         if (!token) {
             setError("No hay token. Por favor, inicia sesión.");

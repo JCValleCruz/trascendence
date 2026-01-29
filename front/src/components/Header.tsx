@@ -66,13 +66,21 @@ const Header = () => {
 	};
 	// --- EFECTOS (Persistencia y OAuth) ---
 	useEffect(() => {
-		const token = sessionStorage.getItem('auth_token');
+		const token = localStorage.getItem('auth_token');
 		if (token) {
 			try {
 				const decoded = jwtDecode<UserPayload>(token);
 				setUser(decoded);
+				fetch('http://localhost:3000/api/user/persistence', {
+					headers: { 'Authorization': `Bearer ${token}` }
+				}).catch(err => {
+					// Si el token es inválido o expiró, hacemos logout limpio
+					console.error("Token inválido o expirado", err);
+					localStorage.removeItem('auth_token');
+					setUser(null);
+				});
 			} catch (e) {
-				sessionStorage.removeItem('auth_token');
+				localStorage.removeItem('auth_token');
 				setUser(null);
 			}
 		}
@@ -113,7 +121,7 @@ const Header = () => {
 
 			if (!response.ok) throw new Error(data.message || data.error || 'Credential error');
 
-			sessionStorage.setItem('auth_token', data.token);
+			localStorage.setItem('auth_token', data.token);
 			const decoded = jwtDecode<UserPayload>(data.token);
 			setUser(decoded);
 
@@ -149,7 +157,7 @@ const Header = () => {
 	const handleLogout = () => {
 		// 1. Avisar al back (Opcional si confías en que el usuario ya no hará peticiones, 
 		// pero recomendable hacerlo para poner is_online=false al instante)
-		const token = sessionStorage.getItem('auth_token');
+		const token = localStorage.getItem('auth_token');
 		if (token) {
 			fetch('http://localhost:3000/api/auth/logout', {
 				method: 'POST',
@@ -158,7 +166,7 @@ const Header = () => {
 
 		}
 		// 2. Limpieza local
-		sessionStorage.removeItem('auth_token'); // <--- IMPORTANTE: sessionStorage
+		localStorage.removeItem('auth_token'); // <--- IMPORTANTE: sessionStorage
 		setUser(null); // Limpiar estado de React
 		closeAllModals();
 		triggerSuccess("Logged out successfully");
