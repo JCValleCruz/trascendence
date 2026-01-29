@@ -47,13 +47,22 @@ const Header = () => {
 	const [registerModalOpen, setRegisterModalOpen] = useState(false);
 	const [resetPasswordModalOpen, setResetPasswordModalOpen] = useState(false);
 
-	const [verUsuarios, setVerUsuarios] = useState(false);
+	const [seeAllUsers, setSeeAllUsers] = useState(false);
 	const [socialOpen, setSocialOpen] = useState(false);
 
 	// Notificaciones
 	const [authError, setAuthError] = useState({ open: false, message: "" });
 	const [successMsg, setSuccessMsg] = useState({ open: false, message: "" });
 
+	const closeAllModals = () => {
+        setLoginModalOpen(false);
+        setRegisterModalOpen(false);
+        setResetPasswordModalOpen(false);
+        setSeeAllUsers(false);
+        setSocialOpen(false);
+        // Cierra también el menú desplegable si estuviera abierto
+        setAnchorEl(null); 
+    };
 	// --- EFECTOS (Persistencia y OAuth) ---
 	useEffect(() => {
 		const token = sessionStorage.getItem('auth_token');
@@ -137,21 +146,22 @@ const Header = () => {
 	};
 
 	const handleLogout = () => {
-    // 1. Avisar al back (Opcional si confías en que el usuario ya no hará peticiones, 
-    // pero recomendable hacerlo para poner is_online=false al instante)
-    const token = sessionStorage.getItem('auth_token');
-    if (token) {
-        fetch('http://localhost:3000/api/auth/logout', { 
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-    }
+		// 1. Avisar al back (Opcional si confías en que el usuario ya no hará peticiones, 
+		// pero recomendable hacerlo para poner is_online=false al instante)
+		const token = sessionStorage.getItem('auth_token');
+		if (token) {
+			fetch('http://localhost:3000/api/auth/logout', { 
+				method: 'POST',
+				headers: { 'Authorization': `Bearer ${token}` }
+			});
 
+		}
     // 2. Limpieza local
-    sessionStorage.removeItem('auth_token'); // <--- IMPORTANTE: sessionStorage
-    setUser(null); // Limpiar estado de React
-	setVerUsuarios(false);
-    navigate("/"); // Redirigir
+		sessionStorage.removeItem('auth_token'); // <--- IMPORTANTE: sessionStorage
+		setUser(null); // Limpiar estado de React
+		closeAllModals();
+		triggerSuccess("Logged out successfully");
+		navigate("/"); // Redirigir
 };
 
 	const handleSwitchToLogin = () => { setRegisterModalOpen(false); setResetPasswordModalOpen(false); setLoginModalOpen(true); };
@@ -225,7 +235,7 @@ const Header = () => {
 				{user && <MenuItem onClick={() => { handleMenuClose(); 
 					setSocialOpen(!socialOpen); }}>Social</MenuItem>}
 				{user && (
-					<MenuItem onClick={() => { handleMenuClose(); setVerUsuarios(true); }}>
+					<MenuItem onClick={() => { handleMenuClose(); setSeeAllUsers(true); }}>
 						Admin: Ver Lista Usuarios
 					</MenuItem>
 				)}
@@ -237,9 +247,9 @@ const Header = () => {
 			<LoginModal open={loginModalOpen} onClose={() => setLoginModalOpen(false)} onLogin={handleLogin} onSwitchToRegister={handleSwitchToRegister} onSwitchToResetPassword={handleSwitchToResetPassword} />
 			<RegisterModal open={registerModalOpen} onClose={() => setRegisterModalOpen(false)} onRegister={handleRegister} onSwitchToLogin={handleSwitchToLogin} />
 			<ResetPasswordModal open={resetPasswordModalOpen} onClose={() => setResetPasswordModalOpen(false)} onResetPassword={() => { }} onSwitchToLogin={handleSwitchToLogin} />
-			{verUsuarios && (
+			{seeAllUsers && (
 				<Box sx={{ p: 4, bgcolor: 'background.paper', mt: 10 }}>
-					<button onClick={() => setVerUsuarios(false)}>Cerrar Lista</button>
+					<button onClick={() => setSeeAllUsers(false)}>Cerrar Lista</button>
 					<UserList />
 				</Box>
 			)}
