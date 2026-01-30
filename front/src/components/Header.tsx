@@ -185,7 +185,8 @@ const Header = () => {
 					<Box component="img" src="/assets/lyrics-logo.png" sx={{ filter: "invert(1)", width: 145, height: 36, bgcolor: "secondary.main", px: 1 }} />
 					<MarqueeContainer>
 						<MarqueeTrack>
-							<MarqueeContent>Pong Tournament • Join the Arena • Win • Glory • </MarqueeContent>
+							<MarqueeContent>Pong Tournament • Join the Arena • Win • Glory • Pong Tournament • Join the Arena • Win • Glory • Pong Tournament • Join the Arena • Win • Glory •</MarqueeContent>
+							<MarqueeContent>Pong Tournament • Join the Arena • Win • Glory • Pong Tournament • Join the Arena • Win • Glory • Pong Tournament • Join the Arena • Win • Glory •</MarqueeContent>
 						</MarqueeTrack>
 					</MarqueeContainer>
 
