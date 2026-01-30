@@ -85,7 +85,7 @@ const Header = () => {
 			}
 		}
 	}, []);
-
+	// Uso de parámetros de búsqueda para manejar errores de OAuth
 	useEffect(() => {
 		const errorType = searchParams.get("error");
 		if (errorType) {
@@ -119,7 +119,8 @@ const Header = () => {
 			});
 			const data = await response.json();
 
-			if (!response.ok) throw new Error(data.message || data.error || 'Credential error');
+			if (!response.ok) 
+					throw new Error(data.message || data.error || 'Credential error');
 
 			localStorage.setItem('auth_token', data.token);
 			const decoded = jwtDecode<UserPayload>(data.token);

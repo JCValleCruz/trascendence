@@ -104,7 +104,7 @@ const userRoutes: FastifyPluginAsync = async (fastify, opts) => {
 	});
 
 
-	// GET /api/user/profile
+	// GET /api/user/persistence - Marcar usuario como online y actualizar last_login
 	fastify.get("/persistence", async (req, reply) => {
 		const userToken = req.user as any; // El usuario del token
 
