@@ -11,35 +11,45 @@ import { SocketProvider } from "./context/SocketContext";
 // Importa tus páginas
 import MainPage from "./pages/MainPage";
 import GamesPage from "./pages/GamesPage";
+import { NotificationProvider } from "./context/NotificationContext";
+import { AuthProvider } from "./context/AuthContext";
 
-const MyRouter = () => <RouterProvider router={createBrowserRouter([
-    {
-        path: "/",
-        element: <MainPage />, // Capa 1: Base
-        children: [
-            /* {
-                path: "/",
-                element: <GamesPage />,
-            }, */
-        ],
-    },
-])} />
-
-
-createRoot(document.getElementById("root")!).render(
-	<Frontend>
+const AppWithTheme = () => {
+    return (
         <ThemeProvider theme={muiTheme}>
             <CssBaseline />
-            <SocketProvider>
-                <MyRouter/>
-            </SocketProvider>
+			<NotificationProvider>
+				<AuthProvider>
+					<SocketProvider> 
+						<RouterProvider router={router} />
+					</SocketProvider>
+				</AuthProvider>
+			</NotificationProvider>
         </ThemeProvider>
-    </Frontend>
+    );
+};
+
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: <Frontend />, // Capa 1: Base
+        children: [
+            {
+                path: "/",
+                element: <MainPage />, // Capa 2: Layout (Header + Outlet + Footer)
+                children: [
+                    {
+                        path: "/",
+                        element: <GamesPage />,
+                    },
+                ],
+            },
+        ],
+    },
+]);
+
+createRoot(document.getElementById("root")!).render(
+    //<StrictMode>
+        <AppWithTheme />
+    //</StrictMode>
 );
-// redux auth
-// setState = login, register
-// proceso el login
-// el usuario se ha logeado
-// boton -> mostrar otra cosa
-// boton -> no mostrar registro
-// ----------------------
