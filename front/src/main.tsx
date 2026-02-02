@@ -11,24 +11,35 @@ import { SocketProvider } from "./context/SocketContext";
 // Importa tus páginas
 import MainPage from "./pages/MainPage";
 import GamesPage from "./pages/GamesPage";
-import MyRouter from "./components/MyRouter";
+
+const MyRouter = () => <RouterProvider router={createBrowserRouter([
+    {
+        path: "/",
+        element: <MainPage />, // Capa 1: Base
+        children: [
+            /* {
+                path: "/",
+                element: <GamesPage />,
+            }, */
+        ],
+    },
+])} />
 
 
 createRoot(document.getElementById("root")!).render(
-    // redux auth
-    // setState = login, register
-    // proceso el login
-    // el usuario se ha logeado
-    // boton -> mostrar otra cosa
-    // boton -> no mostrar registro
-    <Frontend>
-        ----------------------
-    <ThemeProvider theme={muiTheme}>
+	<Frontend>
+        <ThemeProvider theme={muiTheme}>
             <CssBaseline />
             <SocketProvider>
                 <MyRouter/>
             </SocketProvider>
         </ThemeProvider>
     </Frontend>
-    
 );
+// redux auth
+// setState = login, register
+// proceso el login
+// el usuario se ha logeado
+// boton -> mostrar otra cosa
+// boton -> no mostrar registro
+// ----------------------
