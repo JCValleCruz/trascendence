@@ -11,41 +11,41 @@ import {
     StyledDialog,
     StyledTextField,
     PrimaryAuthButton,
-    OAuthButton, 
+    OAuthButton,
 } from "../style/AuthModalStyle";
 import { validateEmail } from "../utils/validation";
 
 interface Props {
     open: boolean;
     onClose: () => void;
-    onLogin: (email: string, pass: string) => Promise<void>;
-    onSwitchToRegister: () => void;
-    onSwitchToResetPassword: () => void;
+    onRegister: (username: string, email: string, pass: string) => Promise<void>;
+    onSwitchToLogin: () => void;
     isLoading?: boolean;
     error?: string;
 }
 
-const LoginModal = ({
+const RegisterModal = ({
     open,
     onClose,
-    onLogin,
-    onSwitchToRegister,
-    onSwitchToResetPassword,
+    onRegister,
+    onSwitchToLogin,
     isLoading = false,
     error,
 }: Props) => {
+    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [emailError, setEmailError] = useState("");
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!email || !password) return;
-        await onLogin(email, password);
+        if (!username || !email || !password) return;
+        await onRegister(username, email, password);
     };
 
     const handleClose = () => {
         if (!isLoading) {
+            setUsername("");
             setEmail("");
             setPassword("");
             setEmailError("");
@@ -53,13 +53,15 @@ const LoginModal = ({
         }
     };
 
-    const handleSwitchToRegister = () => {
+    const handleSwitchToLogin = () => {
+        setUsername("");
         setEmail("");
         setPassword("");
         setEmailError("");
-        onSwitchToRegister();
+        onSwitchToLogin();
     };
 
+    // Mismo estilo forzado que en Login
     const oAuthStyle = {
         backgroundColor: "#000000",
         color: "#FFFFFF",
@@ -73,7 +75,6 @@ const LoginModal = ({
     return (
         <StyledDialog open={open} onClose={handleClose}>
             <Box sx={{ p: 4 }}>
-                {/* --- TÍTULO --- */}
                 <Box sx={{ textAlign: "center", mb: 4 }}>
                     <Typography
                         variant="authSubtitle"
@@ -85,42 +86,50 @@ const LoginModal = ({
                             mb: 1,
                         }}
                     >
-                        Sign in to
+                        Sign up for
                     </Typography>
                     <Typography variant="displayTitle">
                         Transcendence
                     </Typography>
                 </Box>
 
-                {/* --- BOTONES OAUTH VISIBLES --- */}
+                {/* BOTONES OAUTH VISIBLES */}
                 <Stack spacing={2} sx={{ mb: 3 }}>
                     <OAuthButton 
-                        component="a" 
                         href="http://localhost:3000/api/auth/google"
                         sx={oAuthStyle}
                     >
-                        Continue with Google
+                        Sign up with Google
                     </OAuthButton>
 
                     <OAuthButton 
-                        component="a" 
                         href="http://localhost:3000/api/auth/github"
                         sx={oAuthStyle}
                     >
-                        Continue with Github
+                        Sign up with Github
                     </OAuthButton>
                 </Stack>
 
-                {/* --- ALERTA --- */}
                 {error && (
                     <Alert severity="error" sx={{ mb: 2, borderRadius: 0 }}>
                         {error}
                     </Alert>
                 )}
 
-                {/* --- FORMULARIO --- */}
                 <form onSubmit={handleSubmit}>
                     <Stack spacing={2}>
+                        <StyledTextField
+                            fullWidth
+                            type="text"
+                            label="USERNAME"
+                            name="username"
+                            autoComplete="username"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            disabled={isLoading}
+                            required
+                        />
+
                         <StyledTextField
                             fullWidth
                             type="email"
@@ -137,12 +146,13 @@ const LoginModal = ({
                             error={!!emailError}
                             helperText={emailError}
                         />
+
                         <StyledTextField
                             fullWidth
                             type="password"
                             label="PASSWORD"
                             name="password"
-                            autoComplete="current-password"
+                            autoComplete="new-password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             disabled={isLoading}
@@ -151,7 +161,7 @@ const LoginModal = ({
 
                         <PrimaryAuthButton
                             type="submit"
-                            disabled={isLoading || !email || !password}
+                            disabled={isLoading || !username || !email || !password}
                             sx={{ mt: 3 }}
                         >
                             {isLoading ? (
@@ -160,38 +170,18 @@ const LoginModal = ({
                                     sx={{ color: "secondary.main" }}
                                 />
                             ) : (
-                                "Log in"
+                                "Create Account"
                             )}
                         </PrimaryAuthButton>
                     </Stack>
                 </form>
 
-                {/* --- RESET PASS --- */}
-                <Link
-                    component="button"
-                    type="button"
-                    onClick={onSwitchToResetPassword}
-                    sx={{
-                        display: "block",
-                        textAlign: "center",
-                        mt: 2,
-                        textDecoration: "underline",
-                        textDecorationThickness: "2px",
-                        textUnderlineOffset: "4px",
-                        color: "text.secondary",
-                        "&:hover": { color: "text.primary" },
-                    }}
-                >
-                    <Typography variant="subtitle1">Reset password</Typography>
-                </Link>
-
-                {/* --- SWITCHER --- */}
                 <Typography variant="body1" sx={{ textAlign: "center", mt: 3 }}>
-                    No account?{" "}
+                    Already have an account?{" "}
                     <Link
                         component="button"
                         type="button"
-                        onClick={handleSwitchToRegister}
+                        onClick={handleSwitchToLogin}
                         sx={{
                             fontWeight: 900,
                             fontFamily: "'Archivo Black', sans-serif",
@@ -203,7 +193,7 @@ const LoginModal = ({
                             "&:hover": { color: "accent.yellowDark" },
                         }}
                     >
-                        Create one
+                        Log in
                     </Link>
                 </Typography>
             </Box>
@@ -211,4 +201,4 @@ const LoginModal = ({
     );
 };
 
-export default LoginModal;
+export default RegisterModal;

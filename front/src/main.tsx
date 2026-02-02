@@ -4,42 +4,41 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { muiTheme } from "./style/theme";
-import Frontend from "./Frontend";
+import { SocketProvider } from "./context/SocketContext";
 
-// Importa tus páginas
+import Frontend from "./Frontend";
 import MainPage from "./pages/MainPage";
 import GamesPage from "./pages/GamesPage";
 
-const AppWithTheme = () => {
-    return (
-        <ThemeProvider theme={muiTheme}>
-            <CssBaseline />
-            <RouterProvider router={router} />
-        </ThemeProvider>
-    );
-};
 
-const router = createBrowserRouter([
+const MyRouter = () => <RouterProvider router={createBrowserRouter([
     {
         path: "/",
-        element: <Frontend />, // Capa 1: Base
+        element: <MainPage />, // Capa 1: Base
         children: [
             {
                 path: "/",
-                element: <MainPage />, // Capa 2: Layout (Header + Outlet + Footer)
-                children: [
-                    {
-                        path: "/",
-                        element: <GamesPage />,
-                    },
-                ],
-            },
+                element: <GamesPage />, 
+            }, 
         ],
     },
-]);
+])} />
+
+    // redux auth
+    // setState = login, register
+    // proceso el login
+    // el usuario se ha logeado
+    // boton -> mostrar otra cosa
+    // boton -> no mostrar registro
 
 createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-        <AppWithTheme />
-    </StrictMode>
+    <Frontend>
+        <ThemeProvider theme={muiTheme}>
+            <CssBaseline />
+            <SocketProvider>
+                <MyRouter/>
+            </SocketProvider>
+        </ThemeProvider>
+    </Frontend>
+    
 );
