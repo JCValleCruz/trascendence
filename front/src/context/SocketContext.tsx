@@ -32,6 +32,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 	const markAsRead = () => setUnreadCount(0);
 	// Función para conectar
 	const connect = () => {
+		console.log("🔌 Starting Socket Initialization");
+
 		const token = localStorage.getItem('auth_token'); // O localStorage según decidimos
 		if (!token)
 			return;

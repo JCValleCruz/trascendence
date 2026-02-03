@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "@mui/material/styles";
@@ -14,17 +13,20 @@ import GamesPage from "./pages/GamesPage";
 import { NotificationProvider } from "./context/NotificationContext";
 import { AuthProvider } from "./context/AuthContext";
 
+const AppLayout = () => (
+    <NotificationProvider>
+        <AuthProvider>
+            <SocketProvider>
+                <MainPage />
+            </SocketProvider>
+        </AuthProvider>
+    </NotificationProvider>
+);
+
 const router = createBrowserRouter([
 	{
 		path: "/",
-		// Envolvemos MainPage con los Providers que necesitan acceso al Router
-		element: (
-			<AuthProvider>
-				<SocketProvider>
-					<MainPage />
-				</SocketProvider>
-			</AuthProvider>
-		),
+		element: <AppLayout />,
 		children: [
 			{
 				path: "/",
@@ -38,9 +40,7 @@ createRoot(document.getElementById("root")!).render(
 	<Frontend>
 		<ThemeProvider theme={muiTheme}>
 			<CssBaseline />
-			<NotificationProvider>
-						<RouterProvider router={router} />
-			</NotificationProvider>
+			<RouterProvider router={router} />
 		</ThemeProvider>
 	</Frontend >
 );

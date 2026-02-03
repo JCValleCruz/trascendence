@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
+import React, { createContext, useContext, useState, ReactNode, useCallback, useEffect } from "react";
 import { Snackbar, Alert } from "@mui/material";
 import AuthErrorNotification from "../components/AuthErrorNotification";
+import { useSearchParams } from "react-router-dom";
 
 // Definimos qué funciones "regalamos" al resto de la app
 interface NotificationContextType {
@@ -19,6 +20,7 @@ export const useNotification = () => {
 };
 
 export const NotificationProvider = ({ children }: { children: ReactNode }) => {
+	
     // --- ESTADOS (Movidos desde Header.tsx) ---
     const [successMsg, setSuccessMsg] = useState({ open: false, message: "" });
     const [errorMsg, setErrorMsg] = useState({ open: false, message: "" });

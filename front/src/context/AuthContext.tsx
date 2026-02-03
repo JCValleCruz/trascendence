@@ -29,8 +29,8 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-	const [searchParams, setSearchParams] = useSearchParams();
 	const { notifySuccess, notifyError } = useNotification();
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	// OAuth Error
 	const errorType = searchParams.get("error");

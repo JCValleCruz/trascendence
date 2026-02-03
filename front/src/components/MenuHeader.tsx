@@ -82,15 +82,14 @@ const MenuHeader = () => {
 				{!user && <MenuItem onClick={() => { handleMenuClose(); modals.openLogin(); }}>Login</MenuItem>}
 				{!user && <MenuItem onClick={() => { handleMenuClose(); modals.openRegister(); }}>Register</MenuItem>}
 
-				{!user && <Divider />}
 				{!user && <MenuItem onClick={() => handleNavigate("/stats")}>Rankings</MenuItem>}
 
 				{user && <MenuItem disabled sx={{ opacity: "1 !important", color: "primary.main", fontWeight: "bold" }}>Hola, {user.username}</MenuItem>}
 				{user && <MenuItem onClick={() => handleNavigate("/profile")}>Profile</MenuItem>}
-				{user && <MenuItem onClick={() => { handleMenuClose(); modals.toggleSocial(); }}>Social</MenuItem>}
-				{user && <MenuItem onClick={() => { handleMenuClose(); modals.openUserList(); }}>Admin: Ver Lista Usuarios</MenuItem>}
+				{user ? (<MenuItem onClick={() => { handleMenuClose(); modals.toggleSocial(); }}>Social</MenuItem>) :<MenuItem disabled >Social</MenuItem >}
+				{user ? (<MenuItem onClick={() => { handleMenuClose(); modals.openUserList(); }}>Admin:Ver Lista Usuarios</MenuItem>) :<MenuItem disabled> Admin:Ver Lista Usuarios</MenuItem>}
 
-				{user && <Divider />}
+	
 				{user && <MenuItem onClick={onLogoutClick}>Logout</MenuItem>}
 			</Menu>
 

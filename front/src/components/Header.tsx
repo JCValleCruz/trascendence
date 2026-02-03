@@ -9,8 +9,6 @@ import MenuHeader from "./MenuHeader";
 import { useNotification } from "../context/NotificationContext";
 
 const Header = () => {
-	
-
 	return (
 		<AppBar position="fixed" sx={{ bgcolor: "primary.dark", borderBottom: "2px solid", borderColor: "secondary.main", boxShadow: "none" }}>
 			<Toolbar disableGutters variant="dense" sx={{ minHeight: 48, px: 0 }}>
