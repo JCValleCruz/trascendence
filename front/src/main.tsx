@@ -17,7 +17,14 @@ import { AuthProvider } from "./context/AuthContext";
 const router = createBrowserRouter([
 	{
 		path: "/",
-		element: <MainPage />, // Capa 2: Layout (Header + Outlet + Footer)
+		// Envolvemos MainPage con los Providers que necesitan acceso al Router
+		element: (
+			<AuthProvider>
+				<SocketProvider>
+					<MainPage />
+				</SocketProvider>
+			</AuthProvider>
+		),
 		children: [
 			{
 				path: "/",
@@ -32,11 +39,7 @@ createRoot(document.getElementById("root")!).render(
 		<ThemeProvider theme={muiTheme}>
 			<CssBaseline />
 			<NotificationProvider>
-				<AuthProvider>
-					<SocketProvider>
 						<RouterProvider router={router} />
-					</SocketProvider>
-				</AuthProvider>
 			</NotificationProvider>
 		</ThemeProvider>
 	</Frontend >

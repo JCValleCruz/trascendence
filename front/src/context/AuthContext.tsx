@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useNotification } from "./NotificationContext";
+import { useSearchParams } from "react-router-dom";
 
 // Definimos la forma de nuestro usuario (copiado de Header)
 interface UserPayload {
@@ -28,7 +29,23 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+	const [searchParams, setSearchParams] = useSearchParams();
 	const { notifySuccess, notifyError } = useNotification();
+
+	// OAuth Error
+	const errorType = searchParams.get("error");
+	useEffect(() => {
+		
+		if (errorType) {
+			const message = errorType === "user_exists"
+				? "Email already registered"
+				: "External auth error";
+			notifyError(message);
+			
+			setSearchParams({}, { replace: true });
+		}
+	}, [errorType, setSearchParams, notifyError]);
+	
 	const [user, setUser] = useState<UserPayload | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -137,7 +154,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 				}
 			}
 		};
-
 		checkToken(); // Check inicial
 		const interval = setInterval(checkToken, 500); // Polling
 		return () => clearInterval(interval);

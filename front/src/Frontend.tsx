@@ -1,4 +1,3 @@
-import { Outlet } from "react-router-dom";
 import { useEffect } from "react";
 
 const Frontend = ({ children }: { children: React.ReactNode }) => {
@@ -21,7 +20,7 @@ const Frontend = ({ children }: { children: React.ReactNode }) => {
 		//al cerrar la window, se llama a handleTabClose
 		const handleTabClose = () => {
 			const token = localStorage.getItem('auth_token');
-			
+
 			if (token) {
 				fetch('http://localhost:3000/api/auth/logout', {
 					method: 'POST',
@@ -37,6 +36,8 @@ const Frontend = ({ children }: { children: React.ReactNode }) => {
 			window.removeEventListener('beforeunload', handleTabClose);
 		};
 	}, []);
+
+	
 
 	return (
 		<>

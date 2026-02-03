@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, { createContext, useContext, useState, ReactNode, useCallback } from "react";
 import { Snackbar, Alert } from "@mui/material";
 import AuthErrorNotification from "../components/AuthErrorNotification";
 
@@ -24,13 +24,13 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
     const [errorMsg, setErrorMsg] = useState({ open: false, message: "" });
 
     // --- FUNCIONES (Simplificadas) ---
-    const notifySuccess = (message: string) => {
+    const notifySuccess = useCallback((message: string) => {
         setSuccessMsg({ open: true, message });
-    };
+    }, []); // Array vacío: la función nunca cambia su referencia
 
-    const notifyError = (message: string) => {
+    const notifyError = useCallback((message: string) => {
         setErrorMsg({ open: true, message });
-    };
+    }, []);
 
     const handleCloseSuccess = () => setSuccessMsg({ ...successMsg, open: false });
     const handleCloseError = () => setErrorMsg({ ...errorMsg, open: false });
