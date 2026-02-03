@@ -14,42 +14,30 @@ import GamesPage from "./pages/GamesPage";
 import { NotificationProvider } from "./context/NotificationContext";
 import { AuthProvider } from "./context/AuthContext";
 
-const AppWithTheme = () => {
-    return (
-        <ThemeProvider theme={muiTheme}>
-            <CssBaseline />
+const router = createBrowserRouter([
+	{
+		path: "/",
+		element: <MainPage />, // Capa 2: Layout (Header + Outlet + Footer)
+		children: [
+			{
+				path: "/",
+				element: <GamesPage />,
+			},
+		],
+	},
+]);
+
+createRoot(document.getElementById("root")!).render(
+	<Frontend>
+		<ThemeProvider theme={muiTheme}>
+			<CssBaseline />
 			<NotificationProvider>
 				<AuthProvider>
-					<SocketProvider> 
+					<SocketProvider>
 						<RouterProvider router={router} />
 					</SocketProvider>
 				</AuthProvider>
 			</NotificationProvider>
-        </ThemeProvider>
-    );
-};
-
-const router = createBrowserRouter([
-    {
-        path: "/",
-        element: <Frontend />, // Capa 1: Base
-        children: [
-            {
-                path: "/",
-                element: <MainPage />, // Capa 2: Layout (Header + Outlet + Footer)
-                children: [
-                    {
-                        path: "/",
-                        element: <GamesPage />,
-                    },
-                ],
-            },
-        ],
-    },
-]);
-
-createRoot(document.getElementById("root")!).render(
-    //<StrictMode>
-        <AppWithTheme />
-    //</StrictMode>
+		</ThemeProvider>
+	</Frontend >
 );
