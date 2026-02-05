@@ -22,12 +22,16 @@ interface LoginBody {
 	email: string;
 	password: string;
 }
+interface UpdateUsernameBody {
+	newUsername: string;
+}
 
 // ============================================================================
 // RUTAS DE AUTENTICACIÓN
 // ============================================================================
 
 const authRoutes: FastifyPluginAsync = async (fastify, opts) => {
+
 
 	// --- POST /register (Sin cambios, estaba bien) ---
 	fastify.post<{ Body: RegisterBody }>("/register", async (request, reply) => {
@@ -177,24 +181,69 @@ const authRoutes: FastifyPluginAsync = async (fastify, opts) => {
 	});
 
 
-	fastify.post("/logout", 
-        { preHandler: [authenticate] }, // <--- ESTA ES LA CLAVE MÁGICA 🗝️
-        async (request, reply) => {
-            try {
-                const userId = (request.user as any).id;
-                
-                console.log(`🔌 Logout user ${userId}...`);
+	fastify.post("/logout",
+		{ preHandler: [authenticate] }, // <--- ESTA ES LA CLAVE MÁGICA 🗝️
+		async (request, reply) => {
+			try {
+				const userId = (request.user as any).id;
 
-                await userRepository.updateLastLogin(userId);
-                await userRepository.updateOnlineStatus(userId, false); // <--- Ahora sí funciona
-                
-                return { message: "Desconectado" };
-            } catch (err) {
-                request.log.error(err);
-                return reply.code(500).send({ error: "No se pudo cerrar sesión" });
+				console.log(`🔌 Logout user ${userId}...`);
+
+				await userRepository.updateLastLogin(userId);
+				await userRepository.updateOnlineStatus(userId, false); // <--- Ahora sí funciona
+
+				return { message: "Desconectado" };
+			} catch (err) {
+				request.log.error(err);
+				return reply.code(500).send({ error: "No se pudo cerrar sesión" });
+			}
+		}
+	);
+	// auth.api.ts
+
+fastify.patch<{ Body: UpdateUsernameBody }>(
+    "/update-username",
+    { preHandler: [authenticate] }, // Verifica que 'authenticate' esté bien importado
+    async (request, reply) => {
+        try {
+            const { newUsername } = request.body;
+            // Forzamos el tipado para evitar el error de "id does not exist on type user"
+            const currentUser = request.user as { id: number; email: string; username: string };
+
+            if (!currentUser) {
+                return reply.code(401).send({ error: "Unauthorized: No user found in token" });
             }
+
+            const userId = currentUser.id;
+
+            // 1. Validar disponibilidad
+            const existingUser = await userRepository.findByUsername(newUsername);
+            if (existingUser && existingUser.id !== userId) {
+                return reply.code(409).send({ error: "Username is already taken" });
+            }
+
+            // 2. Actualizar DB
+            await userRepository.updateUsername(userId, newUsername);
+
+            // 3. Generar nuevo Token
+            const newToken = jwt.sign(
+                { id: userId, email: currentUser.email, username: newUsername },
+                process.env.JWT_SECRET || 'super_secret',
+                { expiresIn: '7d' }
+            );
+
+            // 4. Enviar respuesta con el token
+            return reply.code(200).send({
+                message: "Username updated successfully",
+                token: newToken,
+                username: newUsername
+            });
+        } catch (error: any) {
+            request.log.error(error);
+            return reply.code(500).send({ error: "Internal server error", details: error.message });
         }
-    );
+    }
+);
 };
 
 export default authRoutes;

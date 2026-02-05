@@ -16,6 +16,7 @@ import RegisterModal from "./RegisterModal";
 import ResetPasswordModal from "./ResetPasswordModal";
 import UserList from "./UserList";
 import { SocialPanel } from "./SocialPanel";
+import {Profile} from "./Profile";
 
 import { useSocket } from "../context/SocketContext";
 import { useAuth } from "../context/AuthContext";
@@ -88,7 +89,7 @@ const MenuHeader = () => {
 				{!user && <MenuItem onClick={() => handleNavigate("/stats")}>Rankings</MenuItem>}
 
 				{user && <MenuItem disabled sx={{ opacity: "1 !important", color: "primary.main", fontWeight: "bold" }}>Hola, {user.username}</MenuItem>}
-				{user && <MenuItem onClick={() => handleNavigate("/profile")}>Profile</MenuItem>}
+				{user ? (<MenuItem onClick={() => { handleMenuClose(); modals.toggleProfile(); }}>Profile</MenuItem>) :<MenuItem disabled >Profile</MenuItem >}
 				{user ? (<MenuItem onClick={() => { handleMenuClose(); modals.toggleSocial(); }}>Social</MenuItem>) :<MenuItem disabled >Social</MenuItem >}
 				{user ? (<MenuItem onClick={() => { handleMenuClose(); modals.openUserList(); }}>Admin:Ver Lista Usuarios</MenuItem>) :<MenuItem disabled> Admin:Ver Lista Usuarios</MenuItem>}
 
@@ -119,6 +120,7 @@ const MenuHeader = () => {
 
 			<UserList open={modals.seeAllUsers} onClose={modals.closeAll} />
 			<SocialPanel open={modals.socialOpen} onClose={modals.closeAll} />
+			<Profile open={modals.profileOpen} onClose={modals.closeAll} />
 		</>
 	);
 };
