@@ -33,7 +33,7 @@ const MenuHeader = () => {
 
 	const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => setAnchorEl(event.currentTarget);
 	const handleMenuClose = () => setAnchorEl(null);
-	const handleNavigate = (path: string) => { handleMenuClose(); navigate(path); };
+	const handleNavigate = (path: string) => { handleMenuClose(); navigate(path); }; // no tendremos otro path, quitar.
 
 	// --- PUENTES LÓGICOS ---
 	const onLoginSubmit = async (email: string, pass: string) => {
@@ -41,7 +41,10 @@ const MenuHeader = () => {
 	};
 
 	const onRegisterSubmit = async (username: string, email: string, pass: string) => {
-		if (await register(username, email, pass)) modals.switchToLogin();
+		if (await register(username, email, pass)) {
+			await login(email, pass);
+			modals.closeAll();
+		}
 	};
 
 	const onLogoutClick = () => {

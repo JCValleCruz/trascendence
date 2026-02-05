@@ -71,7 +71,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 			setUser(decoded);
 			lastTokenRef.current = data.token;
 
-			notifySuccess(`¡Welcome back, ${decoded.username}!`);
+			notifySuccess(`Finally here, ${decoded.username}`);
 			return true;
 		} catch (error: any) {
 			notifyError(error.message);
